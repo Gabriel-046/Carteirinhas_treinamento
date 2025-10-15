@@ -25,10 +25,6 @@ except Exception as e:
     st.error(f"Erro ao carregar o arquivo Excel: {e}")
     st.stop()
 
-# Mostrar primeiras linhas (opcional)
-if st.checkbox("Mostrar primeiras linhas da planilha (verificar colunas)"):
-    st.dataframe(df.head())
-
 # Mapeamento automático de colunas
 def find_col(possible):
     for c in possible:
@@ -91,7 +87,7 @@ if st.button("Consultar"):
             cargo = filtro.iloc[0][col_cargo] if col_cargo in filtro.columns else ""
             depto = filtro.iloc[0][col_depto] if col_depto in filtro.columns else ""
             unidade = filtro.iloc[0][col_unidade] if col_unidade in filtro.columns else ""
-            st.success(f"{nome} — {cargo} | {depto} | {unidade}")
+            st.success(f"{nome} — {cargo} — {depto} — {unidade}")
             st.write(f"RE: **{re_input}** | Admissão: **{adm_date.strftime('%d/%m/%Y')}**")
 
             if col_trein and col_trein in filtro.columns:
@@ -108,3 +104,4 @@ if st.button("Consultar"):
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
+
