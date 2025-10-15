@@ -25,10 +25,6 @@ except Exception as e:
     st.error(f"Erro ao carregar o arquivo Excel: {e}")
     st.stop()
 
-# Mostrar primeiras linhas (opcional)
-if st.checkbox("Mostrar primeiras linhas da planilha (verificar colunas)"):
-    st.dataframe(df.head())
-
 # Mapeamento automático de colunas
 def find_col(possible):
     for c in possible:
@@ -103,3 +99,4 @@ if st.button("Consultar"):
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
+
