@@ -25,10 +25,6 @@ except Exception as e:
     st.error(f"Erro ao carregar o arquivo Excel: {e}")
     st.stop()
 
-# Mostrar primeiras linhas (opcional)
-if st.checkbox("Mostrar primeiras linhas da planilha (verificar colunas)"):
-    st.dataframe(df.head())
-
 # Mapeamento automático de colunas
 possible_cod = ["COD_FUNCIONARIO", "RE", "Cod", "cod_funcionario", "cod"]
 possible_adm = ["DATA_ADMISSAO", "Admissao", "admissao", "DataAdmissao", "DATA_ADM"]
@@ -110,4 +106,5 @@ if st.button("Consultar"):
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
+
 
