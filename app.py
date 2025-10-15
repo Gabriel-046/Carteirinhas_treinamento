@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Carteirinha de Treinamento — Streamlit App
-@author: gabriel.oliveira
-"""
-
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -18,14 +12,17 @@ Preencha **RE** e **Data de Admissão** para ver a carteirinha.
 Formato da data: **DD/MM/AAAA** (ex: 15/03/2022)
 """)
 
-# Caminho do arquivo padrão (deve estar no mesmo diretório do app.py)
+# Caminho do arquivo Excel
 LOCAL_PATH = "Treinamentos Normativos.xlsx"
 
 # Carregar a planilha
 try:
-    df = pd.read_excel(LOCAL_PATH)
+    df = pd.read_excel(LOCAL_PATH, engine="openpyxl")
 except FileNotFoundError:
     st.error("Arquivo padrão não encontrado. Certifique-se de que 'Treinamentos Normativos.xlsx' está no repositório.")
+    st.stop()
+except Exception as e:
+    st.error(f"Erro ao carregar o arquivo Excel: {e}")
     st.stop()
 
 # Mostrar primeiras linhas (opcional)
@@ -84,7 +81,7 @@ if st.button("Consultar"):
 
         # Filtrar os dados
         filtro = df[(df[col_cod].astype(str) == str(re_input)) & (df[col_adm] == adm_date)]
-``
+
         if filtro.empty:
             st.warning(f"Nenhum registro encontrado para RE {re_input} e admissão {admissao_input}.")
         else:
@@ -99,10 +96,10 @@ if st.button("Consultar"):
                 df_display = filtro[[col_trein]].copy()
 
                 # Se houver coluna de vencimento, colocar na frente
-                if col_venc:
+                if col_venc and col_venc in filtro.columns:
                     df_display.insert(
-                        0, 
-                        "Data de Vencimento", 
+                        0,
+                        "Data de Vencimento",
                         pd.to_datetime(filtro[col_venc]).dt.strftime("%d/%m/%Y")
                     )
 
@@ -113,4 +110,4 @@ if st.button("Consultar"):
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
-
+``
