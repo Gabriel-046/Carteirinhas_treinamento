@@ -30,7 +30,7 @@ if st.checkbox("Mostrar primeiras linhas da planilha (verificar colunas)"):
     st.dataframe(df.head())
 
 # Mapeamento automático de colunas
-def find_col(possible, df):
+def find_col(possible):
     for c in possible:
         if c in df.columns:
             return c
@@ -41,16 +41,18 @@ possible_adm = ["DATA_ADMISSAO", "Admissao", "admissao", "DataAdmissao", "DATA_A
 possible_nome = ["NOME", "Nome", "nome"]
 possible_cargo = ["CARGO", "Cargo", "cargo"]
 possible_trein = ["TREINAMENTO_&_DATA", "TREINAMENTO", "DESCRICAO", "CURSO", "Treinamento"]
-possible_venc = ["DATA_VENCIMENTO", "VENCIMENTO", "DataVencimento", "Data Vencimento"]
 possible_renov = ["DATA_RENOVACAO", "RENOVACAO", "DataRenovacao", "Data Renovação"]
+possible_depto = ["DEPARTAMENTO", "Departamento", "departamento"]
+possible_unidade = ["FILIAL_NOME", "Unidade", "unidade", "FILIAL"]
 
-col_cod = find_col(possible_cod, df)
-col_adm = find_col(possible_adm, df)
-col_nome = find_col(possible_nome, df)
-col_cargo = find_col(possible_cargo, df)
-col_trein = find_col(possible_trein, df)
-col_venc = find_col(possible_venc, df)
-col_renov = find_col(possible_renov, df)
+col_cod = find_col(possible_cod)
+col_adm = find_col(possible_adm)
+col_nome = find_col(possible_nome)
+col_cargo = find_col(possible_cargo)
+col_trein = find_col(possible_trein)
+col_renov = find_col(possible_renov)
+col_depto = find_col(possible_depto)
+col_unidade = find_col(possible_unidade)
 
 if not col_cod or not col_adm or not col_nome:
     st.error(
@@ -87,7 +89,9 @@ if st.button("Consultar"):
         else:
             nome = filtro.iloc[0][col_nome]
             cargo = filtro.iloc[0][col_cargo] if col_cargo in filtro.columns else ""
-            st.success(f"{nome} — {cargo}")
+            depto = filtro.iloc[0][col_depto] if col_depto in filtro.columns else ""
+            unidade = filtro.iloc[0][col_unidade] if col_unidade in filtro.columns else ""
+            st.success(f"{nome} — {cargo} | {depto} | {unidade}")
             st.write(f"RE: **{re_input}** | Admissão: **{adm_date.strftime('%d/%m/%Y')}**")
 
             if col_trein and col_trein in filtro.columns:
@@ -96,11 +100,9 @@ if st.button("Consultar"):
                 df_display = filtro[[col_trein]].copy()
                 df_display[col_trein] = df_display[col_trein].astype(str)
 
-                # Adicionar coluna de renovação após treinamento
                 if col_renov and col_renov in filtro.columns:
-                    df_display["Data de Renovação"] = pd.to_datetime(filtro[col_renov]).dt.strftime("%d/%m/%Y")
-
-                df_display = df_display[[col_trein, "Data de Renovação"]] if "Data de Renovação" in df_display.columns else df_display[[col_trein]]
+                    df_display["Data de Renovação"] = filtro[col_renov].astype(str)
+                    df_display = df_display[[col_trein, "Data de Renovação"]]
 
                 st.dataframe(df_display.rename(columns={col_trein: "Treinamento"}))
             else:
