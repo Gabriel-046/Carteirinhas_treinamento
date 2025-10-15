@@ -93,11 +93,9 @@ if st.button("Consultar"):
 
                 # Se houver coluna de vencimento, colocar na frente
                 if col_venc and col_venc in filtro.columns:
-                    df_display.insert(
-                        0,
-                        "Data de Vencimento",
-                        pd.to_datetime(filtro[col_venc]).dt.strftime("%d/%m/%Y")
-                    )
+                    df_display["Data de Vencimento"] = 
+                    pd.to_datetime(filtro[col_venc]).dt.strftime("%d/%m/%Y")
+                    df_display = df_display[[col_trein, "Data de Vencimento"]]
 
                 # Garantir que a coluna de treinamento esteja como texto
                 df_display[col_trein] = df_display[col_trein].astype(str)
@@ -106,5 +104,6 @@ if st.button("Consultar"):
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
+
 
 
