@@ -25,8 +25,12 @@ except Exception as e:
     st.error(f"Erro ao carregar o arquivo Excel: {e}")
     st.stop()
 
+# Mostrar primeiras linhas (opcional)
+if st.checkbox("Mostrar primeiras linhas da planilha (verificar colunas)"):
+    st.dataframe(df.head())
+
 # Mapeamento automático de colunas
-def find_col(possible):
+def find_col(possible, df):
     for c in possible:
         if c in df.columns:
             return c
@@ -38,13 +42,15 @@ possible_nome = ["NOME", "Nome", "nome"]
 possible_cargo = ["CARGO", "Cargo", "cargo"]
 possible_trein = ["TREINAMENTO_&_DATA", "TREINAMENTO", "DESCRICAO", "CURSO", "Treinamento"]
 possible_venc = ["DATA_VENCIMENTO", "VENCIMENTO", "DataVencimento", "Data Vencimento"]
+possible_renov = ["DATA_RENOVACAO", "RENOVACAO", "DataRenovacao", "Data Renovação"]
 
-col_cod = find_col(possible_cod)
-col_adm = find_col(possible_adm)
-col_nome = find_col(possible_nome)
-col_cargo = find_col(possible_cargo)
-col_trein = find_col(possible_trein)
-col_venc = find_col(possible_venc)
+col_cod = find_col(possible_cod, df)
+col_adm = find_col(possible_adm, df)
+col_nome = find_col(possible_nome, df)
+col_cargo = find_col(possible_cargo, df)
+col_trein = find_col(possible_trein, df)
+col_venc = find_col(possible_venc, df)
+col_renov = find_col(possible_renov, df)
 
 if not col_cod or not col_adm or not col_nome:
     st.error(
@@ -90,13 +96,13 @@ if st.button("Consultar"):
                 df_display = filtro[[col_trein]].copy()
                 df_display[col_trein] = df_display[col_trein].astype(str)
 
-                if col_venc and col_venc in filtro.columns:
-                    venc_formatada = pd.to_datetime(filtro[col_venc]).dt.strftime("%d/%m/%Y")
-                    df_display["Data de Vencimento"] = venc_formatada
-                    df_display = df_display[[col_trein, "Data de Vencimento"]]
+                # Adicionar coluna de renovação após treinamento
+                if col_renov and col_renov in filtro.columns:
+                    df_display["Data de Renovação"] = pd.to_datetime(filtro[col_renov]).dt.strftime("%d/%m/%Y")
+
+                df_display = df_display[[col_trein, "Data de Renovação"]] if "Data de Renovação" in df_display.columns else df_display[[col_trein]]
 
                 st.dataframe(df_display.rename(columns={col_trein: "Treinamento"}))
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
-
