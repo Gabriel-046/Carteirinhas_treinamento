@@ -25,19 +25,23 @@ except Exception as e:
     st.error(f"Erro ao carregar o arquivo Excel: {e}")
     st.stop()
 
+# Mostrar primeiras linhas (opcional)
+if st.checkbox("Mostrar primeiras linhas da planilha (verificar colunas)"):
+    st.dataframe(df.head())
+
 # Mapeamento automático de colunas
+def find_col(possible):
+    for c in possible:
+        if c in df.columns:
+            return c
+    return None
+
 possible_cod = ["COD_FUNCIONARIO", "RE", "Cod", "cod_funcionario", "cod"]
 possible_adm = ["DATA_ADMISSAO", "Admissao", "admissao", "DataAdmissao", "DATA_ADM"]
 possible_nome = ["NOME", "Nome", "nome"]
 possible_cargo = ["CARGO", "Cargo", "cargo"]
 possible_trein = ["TREINAMENTO_&_DATA", "TREINAMENTO", "DESCRICAO", "CURSO", "Treinamento"]
 possible_venc = ["DATA_VENCIMENTO", "VENCIMENTO", "DataVencimento", "Data Vencimento"]
-
-def find_col(possible):
-    for c in possible:
-        if c in df.columns:
-            return c
-    return None
 
 col_cod = find_col(possible_cod)
 col_adm = find_col(possible_adm)
@@ -68,14 +72,12 @@ if st.button("Consultar"):
             st.error("Formato de data inválido. Use DD/MM/AAAA.")
             st.stop()
 
-        # Converter coluna de admissão para date
         try:
             df[col_adm] = pd.to_datetime(df[col_adm]).dt.date
         except Exception as e:
             st.error(f"Erro ao converter a coluna de admissão: {e}")
             st.stop()
 
-        # Filtrar os dados
         filtro = df[(df[col_cod].astype(str) == str(re_input)) & (df[col_adm] == adm_date)]
 
         if filtro.empty:
@@ -90,20 +92,14 @@ if st.button("Consultar"):
                 st.subheader("Treinamentos:")
 
                 df_display = filtro[[col_trein]].copy()
-
-                # Se houver coluna de vencimento, colocar na frente
-                if col_venc and col_venc in filtro.columns:
-                    df_display["Data de Vencimento"] = 
-                    pd.to_datetime(filtro[col_venc]).dt.strftime("%d/%m/%Y")
-                    df_display = df_display[[col_trein, "Data de Vencimento"]]
-
-                # Garantir que a coluna de treinamento esteja como texto
                 df_display[col_trein] = df_display[col_trein].astype(str)
+
+                if col_venc and col_venc in filtro.columns:
+                    venc_formatada = pd.to_datetime(filtro[col_venc]).dt.strftime("%d/%m/%Y")
+                    df_display["Data de Vencimento"] = venc_formatada
+                    df_display = df_display[[col_trein, "Data de Vencimento"]]
 
                 st.dataframe(df_display.rename(columns={col_trein: "Treinamento"}))
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
-
-
-
