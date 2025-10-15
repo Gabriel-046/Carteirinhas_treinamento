@@ -84,7 +84,7 @@ if st.button("Consultar"):
 
         # Filtrar os dados
         filtro = df[(df[col_cod].astype(str) == str(re_input)) & (df[col_adm] == adm_date)]
-
+``
         if filtro.empty:
             st.warning(f"Nenhum registro encontrado para RE {re_input} e admissão {admissao_input}.")
         else:
@@ -113,3 +113,4 @@ if st.button("Consultar"):
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
+
