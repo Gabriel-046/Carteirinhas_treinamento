@@ -110,4 +110,4 @@ if st.button("Consultar"):
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
-``
+
