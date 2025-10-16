@@ -15,8 +15,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Logo
-logo_path = "image.png"  # logo que será usada como "foto"
-layout_path = "apresentacao-interna (3).jpg"  # layout da carteirinha
+logo_path = "logo.webp"  # logo que será usada como "foto"
+layout_path = "image.png"  # layout da carteirinha
 
 # Título
 st.title("Carteirinha Digital de Treinamento")
@@ -136,3 +136,4 @@ if st.button("Consultar"):
 
     except Exception as e:
         st.error(f"Erro ao gerar carteirinha: {e}")
+
