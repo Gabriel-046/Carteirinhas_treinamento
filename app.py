@@ -33,7 +33,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
     background = Image.open(layout_path).convert("RGB")
     draw = ImageDraw.Draw(background)
 
-    logo = Image.open(logo_path).resize((150, 150))
+    logo = Image.open(logo_path).resize((250, 150))
     background.paste(logo, (50, 50))
 
     try:
@@ -129,6 +129,7 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
+
 
 
 
