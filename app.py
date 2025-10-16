@@ -1,9 +1,23 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from PIL import Image
 
 # Configuração da página
 st.set_page_config(page_title="Carteirinha de Treinamento", page_icon="🎓")
+
+# Ocultar menu e rodapé do Streamlit
+hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# Exibir logo
+logo = Image.open("logo.png")  # Certifique-se de que o nome do arquivo está correto
+st.image(logo, width=200)
 
 st.title("🎓 Carteirinha de Treinamento")
 
