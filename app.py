@@ -53,6 +53,7 @@ possible_cargo = ["CARGO", "Cargo", "cargo"]
 possible_trein = ["TREINAMENTO_STATUS_GERAL"]
 possible_depto = ["DEPARTAMENTO", "Departamento", "departamento"]
 possible_unidade = ["FILIAL_NOME", "Unidade", "unidade", "FILIAL"]
+possible_trilha = ["TRILHA DE TREINAMENTO", "Trilha", "TRILHA"]
 
 col_cod = find_col(possible_cod)
 col_adm = find_col(possible_adm)
@@ -61,6 +62,7 @@ col_cargo = find_col(possible_cargo)
 col_trein = find_col(possible_trein)
 col_depto = find_col(possible_depto)
 col_unidade = find_col(possible_unidade)
+col_trilha = find_col(possible_trilha)
 
 if not col_cod or not col_adm or not col_nome:
     st.error(
@@ -92,8 +94,22 @@ if st.button("Consultar"):
 
         filtro = df[(df[col_cod].astype(str) == str(re_input)) & (df[col_adm] == adm_date)]
 
+        # Filtrar pelas trilhas desejadas
+        trilhas_desejadas = [
+            "TRILHA COMPLIANCE",
+            "TRILHA DA MANUTENÇÃO",
+            "TRILHA SEGURANÇA DO TRABALHO",
+            "TRILHA SGI",
+            "TRILHA TI"
+        ]
+
+        if col_trilha and col_trilha in filtro.columns:
+            filtro = filtro[filtro[col_trilha].isin(trilhas_desejadas)]
+        else:
+            st.warning("Coluna 'TRILHA DE TREINAMENTO' não encontrada na planilha.")
+
         if filtro.empty:
-            st.warning(f"Nenhum registro encontrado para RE {re_input} e admissão {admissao_input}.")
+            st.warning(f"Nenhum registro encontrado para RE {re_input} e admissão {admissao_input} nas trilhas selecionadas.")
         else:
             nome = filtro.iloc[0][col_nome]
             cargo = filtro.iloc[0][col_cargo] if col_cargo in filtro.columns else ""
@@ -102,15 +118,5 @@ if st.button("Consultar"):
             st.success(f"{nome} — {cargo} — {depto} — {unidade}")
             st.write(f"RE: **{re_input}** | Admissão: **{adm_date.strftime('%d/%m/%Y')}**")
 
-            if col_trein and col_trein in filtro.columns:
-                st.subheader("Treinamentos:")
-                df_display = filtro[[col_trein]].copy()
-                df_display[col_trein] = df_display[col_trein].astype(str)
-                st.dataframe(df_display.rename(columns={col_trein: "Treinamento"}))
-            else:
-                st.subheader("Registros encontrados:")
-                st.dataframe(filtro)
-
-
-
-
+            st.subheader("Treinamentos:")
+            st.dataframe(filtro)
