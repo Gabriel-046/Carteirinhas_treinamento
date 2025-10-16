@@ -16,7 +16,7 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Exibir logo
-logo = Image.open("logo.png")  # Certifique-se de que o nome do arquivo está correto
+logo = Image.open("logo.webp")  # Certifique-se de que o nome do arquivo está correto
 st.image(logo, width=200)
 
 st.title("🎓 Carteirinha de Treinamento")
@@ -110,3 +110,4 @@ if st.button("Consultar"):
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
+
