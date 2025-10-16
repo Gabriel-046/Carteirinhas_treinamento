@@ -126,9 +126,10 @@ if st.button("Consultar"):
 
     imagem_path = gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos)
 
-    st.image(imagem_path, caption="Carteirinha Digital", use_column_width=True)
+    st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
+
 
 
 
