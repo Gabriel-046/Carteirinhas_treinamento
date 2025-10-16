@@ -39,33 +39,34 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
     try:
         font_colab = ImageFont.truetype("DejaVuSans-Bold.ttf", 20)
         font_trein = ImageFont.truetype("DejaVuSans.ttf", 15)
+        font_trein_bold = ImageFont.truetype("Montserrat-Bold.ttf", 20)
     except:
         font_colab = ImageFont.load_default()
         font_trein = ImageFont.load_default()
+        font_trein_bold = ImageFont.load_default()
 
     text_x = 50
     text_y_start = 220
     line_height = 45
 
     draw.text((text_x, text_y_start), f"NOME: {nome}", font=font_colab, fill="black")
-    draw.text((text_x, text_y_start+line_height), f"RE: {re_input}", font=font_colab, fill="black")
-    draw.text((text_x, text_y_start+2*line_height), f"CARGO: {cargo}", font=font_colab, fill="black")
-    draw.text((text_x, text_y_start+3*line_height), f"DEPARTAMENTO: {depto}", font=font_colab, fill="black")
-    draw.text((text_x, text_y_start+4*line_height), f"UNIDADE: {unidade}", font=font_colab, fill="black")
+    draw.text((text_x, text_y_start + line_height), f"RE: {re_input}", font=font_colab, fill="black")
+    draw.text((text_x, text_y_start + 2 * line_height), f"CARGO: {cargo}", font=font_colab, fill="black")
+    draw.text((text_x, text_y_start + 3 * line_height), f"DEPARTAMENTO: {depto}", font=font_colab, fill="black")
+    draw.text((text_x, text_y_start + 4 * line_height), f"UNIDADE: {unidade}", font=font_colab, fill="black")
 
-    train_x = background.width // 2 + 30
     train_y_start = 60
-    max_chars = 65
-texto_titulo = "TREINAMENTOS:"
-text_width = draw.textlength(texto_titulo, font=font_trein_bold)
-center_x = (background.width - text_width) // 2
-draw.text((center_x, train_y_start), texto_titulo, font=font_trein_bold, fill="black")
-    draw.text((train_x, train_y_start), "TREINAMENTOS:", font_trein_bold = ImageFont.truetype("Montserrat-Bold.ttf", 20)
+    texto_titulo = "TREINAMENTOS:"
+    text_width = draw.textlength(texto_titulo, font=font_trein_bold)
+    center_x = (background.width - text_width) // 2
+    draw.text((center_x, train_y_start), texto_titulo, font=font_trein_bold, fill="black")
+
     current_y = train_y_start + 40
+    max_chars = 65
     for treinamento in treinamentos:
         linhas = textwrap.wrap(treinamento, width=max_chars)
         for linha in linhas:
-            draw.text((train_x + 20, current_y), linha, font=font_trein, fill="black")
+            draw.text((center_x, current_y), linha, font=font_trein, fill="black")
             current_y += 25
 
     output_path = "carteirinha_final.png"
@@ -132,25 +133,3 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
