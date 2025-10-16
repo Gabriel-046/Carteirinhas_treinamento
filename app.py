@@ -29,7 +29,7 @@ def carregar_planilha():
     return pd.read_excel(excel_path, sheet_name="BASE", engine="openpyxl")
 
 @st.cache_data
-def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
+def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_por_trilha):
     background = Image.open(layout_path).convert("RGB")
     draw = ImageDraw.Draw(background)
 
@@ -39,9 +39,11 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
     try:
         font_colab = ImageFont.truetype("DejaVuSans-Bold.ttf", 20)
         font_trein = ImageFont.truetype("DejaVuSans.ttf", 15)
+        rodape_font = ImageFont.truetype("DejaVuSans.ttf", 12)
     except:
         font_colab = ImageFont.load_default()
         font_trein = ImageFont.load_default()
+        rodape_font = ImageFont.load_default()
 
     text_x = 50
     text_y_start = 220
@@ -57,13 +59,24 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
     train_y_start = 60
     max_chars = 65
 
-    draw.text((train_x, train_y_start), "TREINAMENTOS:", font=font_trein, fill="black")
+    draw.text((train_x, train_y_start), "TREINAMENTOS POR TRILHA:", font=font_trein, fill="black")
     current_y = train_y_start + 40
-    for treinamento in treinamentos:
-        linhas = textwrap.wrap(treinamento, width=max_chars)
-        for linha in linhas:
-            draw.text((train_x + 5, current_y), linha, font=font_trein, fill="black")
-            current_y += 25
+
+    for trilha, treinamentos in treinamentos_por_trilha.items():
+        draw.text((train_x + 5, current_y), f"- {trilha}:", font=font_trein, fill="black")
+        current_y += 25
+        for treinamento in treinamentos:
+            linhas = textwrap.wrap(treinamento, width=max_chars)
+            for linha in linhas:
+                draw.text((train_x + 15, current_y), linha, font=font_trein, fill="black")
+                current_y += 20
+        current_y += 10
+
+    # Rodapé com data e hora da consulta
+    rodape_texto = f"Consulta em: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+    rodape_x = background.width - 300
+    rodape_y = background.height - 30
+    draw.text((rodape_x, rodape_y), rodape_texto, font=rodape_font, fill="gray")
 
     output_path = "carteirinha_final.png"
     background.save(output_path)
@@ -122,18 +135,11 @@ if st.button("Consultar"):
     cargo = filtro.iloc[0][col_cargo] if col_cargo in filtro.columns else ""
     depto = filtro.iloc[0][col_depto] if col_depto in filtro.columns else ""
     unidade = filtro.iloc[0][col_unidade] if col_unidade in filtro.columns else ""
-    treinamentos = filtro[col_trein].dropna().astype(str).tolist()
 
-    imagem_path = gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos)
+    treinamentos_por_trilha = filtro.groupby(col_trilha)[col_trein].apply(lambda x: x.dropna().unique().tolist()).to_dict()
+
+    imagem_path = gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_por_trilha)
 
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
-
-
-
-
-
-
-
-
