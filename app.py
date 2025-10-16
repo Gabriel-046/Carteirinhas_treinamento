@@ -4,7 +4,7 @@ from datetime import datetime
 from PIL import Image
 
 # Configuração da página
-st.set_page_config(page_title="Carteirinha de Treinamento", page_icon="🎓")
+st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
 # Ocultar menu e rodapé do Streamlit
 hide_streamlit_style = """
@@ -110,4 +110,5 @@ if st.button("Consultar"):
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
+
 
