@@ -97,7 +97,7 @@ col_cargo = find_col(["CARGO", "Cargo", "cargo"])
 col_depto = find_col(["DEPARTAMENTO", "Departamento", "departamento"])
 col_unidade = find_col(["FILIAL_NOME", "Unidade", "unidade", "FILIAL"])
 col_trein = find_col(["TREINAMENTO_STATUS_GERAL"])
-col_trilha = find_col(["TRILHA DE TREINAMENTO", "Trilha", "TRILHA"])
+col_trilha = "TRILHA DE TREINAMENTO"  # Nome fixo da coluna
 
 re_input = st.text_input("Digite seu RE:")
 admissao_input = st.text_input("Data de admissão (DD/MM/AAAA):")
@@ -136,7 +136,14 @@ if st.button("Consultar"):
     depto = filtro.iloc[0][col_depto] if col_depto in filtro.columns else ""
     unidade = filtro.iloc[0][col_unidade] if col_unidade in filtro.columns else ""
 
-    treinamentos_por_trilha = filtro.groupby(col_trilha)[col_trein].apply(lambda x: x.dropna().unique().tolist()).to_dict()
+    if col_trilha in filtro.columns and col_trein in filtro.columns:
+        treinamentos_por_trilha = (
+            filtro.groupby(col_trilha)[col_trein]
+            .apply(lambda x: x.dropna().unique().tolist())
+            .to_dict()
+        )
+    else:
+        treinamentos_por_trilha = {"TREINAMENTOS": filtro[col_trein].dropna().astype(str).tolist()}
 
     imagem_path = gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_por_trilha)
 
