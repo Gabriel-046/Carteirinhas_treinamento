@@ -19,7 +19,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 logo = Image.open("logo.webp")  # Certifique-se de que o nome do arquivo está correto
 st.image(logo, width=200)
 
-st.title("🎓 Carteirinha de Treinamento")
+st.title("🎓 Carteirinha Digital de Treinamento")
 
 st.markdown("""
 Preencha **RE** e **Data de Admissão** para ver a carteirinha.  
@@ -110,5 +110,6 @@ if st.button("Consultar"):
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
+
 
 
