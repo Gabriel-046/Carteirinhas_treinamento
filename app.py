@@ -36,7 +36,7 @@ possible_cod = ["COD_FUNCIONARIO", "RE", "Cod", "cod_funcionario", "cod"]
 possible_adm = ["DATA_ADMISSAO", "Admissao", "admissao", "DataAdmissao", "DATA_ADM"]
 possible_nome = ["NOME", "Nome", "nome"]
 possible_cargo = ["CARGO", "Cargo", "cargo"]
-possible_trein = ["TREINAMENTO_&_DATA", "TREINAMENTO", "DESCRICAO", "CURSO", "Treinamento"]
+possible_trein = ["TREINAMENTO_STATUS_GERAL", "TREINAMENTO", "DESCRICAO", "CURSO", "Treinamento"]
 possible_renov = ["DATA_RENOVACAO", "RENOVACAO", "DataRenovacao", "Data Renovação"]
 possible_depto = ["DEPARTAMENTO", "Departamento", "departamento"]
 possible_unidade = ["FILIAL_NOME", "Unidade", "unidade", "FILIAL"]
@@ -96,12 +96,9 @@ if st.button("Consultar"):
                 df_display = filtro[[col_trein]].copy()
                 df_display[col_trein] = df_display[col_trein].astype(str)
 
-                if col_renov and col_renov in filtro.columns:
-                    df_display["Data de Renovação"] = filtro[col_renov].astype(str)
-                    df_display = df_display[[col_trein, "Data de Renovação"]]
-
                 st.dataframe(df_display.rename(columns={col_trein: "Treinamento"}))
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
+
 
