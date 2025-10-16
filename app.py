@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
-import textwrap
 
 # Configuração da página
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
@@ -17,7 +16,7 @@ st.markdown("""
 
 # Caminhos dos arquivos
 logo_path = "logo.webp"  # logo que será usada como "foto"
-layout_path = "image.png"  # layout da carteirinha
+layout_path = "apresentacao-interna (3).jpg"  # layout da carteirinha
 excel_path = "Treinamentos Normativos.xlsx"
 
 # Título
@@ -28,12 +27,57 @@ Preencha **RE** e **Data de Admissão** para gerar sua carteirinha.
 Formato da data: **DD/MM/AAAA**
 """)
 
-# Carregar planilha
-try:
-    df = pd.read_excel(excel_path, sheet_name="BASE", engine="openpyxl")
-except Exception as e:
-    st.error(f"Erro ao carregar o arquivo: {e}")
-    st.stop()
+# Cache para leitura da planilha
+@st.cache_data
+def carregar_planilha():
+    return pd.read_excel(excel_path, sheet_name="BASE", engine="openpyxl")
+
+# Cache para geração da imagem
+@st.cache_data
+def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
+    background = Image.open(layout_path).convert("RGB")
+    draw = ImageDraw.Draw(background)
+
+    # Inserir logo como foto
+    logo = Image.open(logo_path).resize((150, 150))
+    background.paste(logo, (50, 50))
+
+    # Fontes
+    try:
+        font_colab = ImageFont.truetype("DejaVuSans-Bold.ttf", 36)
+        font_trein = ImageFont.truetype("DejaVuSans.ttf", 28)
+    except:
+        font_colab = ImageFont.load_default()
+        font_trein = ImageFont.load_default()
+
+    # Dados abaixo da foto
+    text_x = 50
+    text_y_start = 220
+    line_height = 45
+
+    draw.text((text_x, text_y_start), f"NOME: {nome}", font=font_colab, fill="black")
+    draw.text((text_x, text_y_start+line_height), f"RE: {re_input}", font=font_colab, fill="black")
+    draw.text((text_x, text_y_start+2*line_height), f"CARGO: {cargo}", font=font_colab, fill="black")
+    draw.text((text_x, text_y_start+3*line_height), f"DEPARTAMENTO: {depto}", font=font_colab, fill="black")
+    draw.text((text_x, text_y_start+4*line_height), f"UNIDADE: {unidade}", font=font_colab, fill="black")
+
+    # Treinamentos na metade direita da imagem
+    train_x = background.width // 2 + 30
+    train_y_start = 60
+
+    draw.text((train_x, train_y_start), "TREINAMENTOS:", font=font_trein, fill="black")
+    current_y = train_y_start + 40
+    for treinamento in treinamentos:
+        draw.text((train_x + 20, current_y), f"- {treinamento}", font=font_trein, fill="black")
+        current_y += 35
+
+    # Salvar imagem
+    output_path = "carteirinha_final.png"
+    background.save(output_path)
+    return output_path
+
+# Carregar dados
+df = carregar_planilha()
 
 # Mapeamento automático de colunas
 def find_col(possible):
@@ -91,55 +135,10 @@ if st.button("Consultar"):
     unidade = filtro.iloc[0][col_unidade] if col_unidade in filtro.columns else ""
     treinamentos = filtro[col_trein].dropna().astype(str).tolist()
 
-    # Gerar carteirinha
-    try:
-        background = Image.open(layout_path).convert("RGB")
-        draw = ImageDraw.Draw(background)
+    # Gerar imagem da carteirinha
+    imagem_path = gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos)
 
-        # Inserir logo como foto
-        logo = Image.open(logo_path).resize((150, 150))
-        background.paste(logo, (50, 50))
-
-        # Fontes
-        try:
-            font_colab = ImageFont.truetype("arial.ttf", 32)
-            font_trein = ImageFont.truetype("arial.ttf", 26)
-        except:
-            font_colab = ImageFont.load_default()
-            font_trein = ImageFont.load_default()
-
-        # Dados abaixo da foto
-        text_x = 50
-        text_y_start = 220
-        line_height = 40
-
-        draw.text((text_x, text_y_start), f"NOME: {nome}", font=font_colab, fill="black")
-        draw.text((text_x, text_y_start+line_height), f"RE: {re_input}", font=font_colab, fill="black")
-        draw.text((text_x, text_y_start+2*line_height), f"CARGO: {cargo}", font=font_colab, fill="black")
-        draw.text((text_x, text_y_start+3*line_height), f"DEPARTAMENTO: {depto}", font=font_colab, fill="black")
-        draw.text((text_x, text_y_start+4*line_height), f"UNIDADE: {unidade}", font=font_colab, fill="black")
-
-        # Treinamentos com quebra de linha
-        train_x = background.width // 2 + 30
-        train_y_start = 60
-        max_width = 50
-
-        draw.text((train_x, train_y_start), "TREINAMENTOS:", font=font_trein, fill="black")
-        current_y = train_y_start + 40
-        for treinamento in treinamentos:
-            wrapped_text = textwrap.wrap(treinamento, width=max_width)
-            for line in wrapped_text:
-                draw.text((train_x + 20, current_y), f"- {line}", font=font_trein, fill="black")
-                current_y += 30
-
-        # Salvar imagem
-        output_path = "carteirinha_final.png"
-        background.save(output_path)
-
-        # Exibir e permitir download
-        st.image(output_path, caption="Carteirinha Digital", use_column_width=True)
-        with open(output_path, "rb") as file:
-            st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
-
-    except Exception as e:
-        st.error(f"Erro ao gerar carteirinha: {e}")
+    # Exibir e permitir download
+    st.image(imagem_path, caption="Carteirinha Digital", use_column_width=True)
+    with open(imagem_path, "rb") as file:
+        st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
