@@ -56,8 +56,11 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
     train_x = background.width // 2 + 30
     train_y_start = 60
     max_chars = 65
-
-    draw.text((train_x, train_y_start), "TREINAMENTOS:", font=font_trein, fill="black")
+texto_titulo = "TREINAMENTOS:"
+text_width = draw.textlength(texto_titulo, font=font_trein_bold)
+center_x = (background.width - text_width) // 2
+draw.text((center_x, train_y_start), texto_titulo, font=font_trein_bold, fill="black")
+    draw.text((train_x, train_y_start), "TREINAMENTOS:", font_trein_bold = ImageFont.truetype("Montserrat-Bold.ttf", 20)
     current_y = train_y_start + 40
     for treinamento in treinamentos:
         linhas = textwrap.wrap(treinamento, width=max_chars)
@@ -129,6 +132,7 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
+
 
 
 
