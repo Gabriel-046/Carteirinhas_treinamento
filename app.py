@@ -17,7 +17,7 @@ LOCAL_PATH = "Treinamentos Normativos.xlsx"
 
 # Carregar a planilha
 try:
-    df = pd.read_excel(LOCAL_PATH, engine="openpyxl")
+    df = pd.read_excel(LOCAL_PATH, sheet_name="BASE", engine="openpyxl")
 except FileNotFoundError:
     st.error("Arquivo padrão não encontrado. Certifique-se de que 'Treinamentos Normativos.xlsx' está no repositório.")
     st.stop()
@@ -36,8 +36,7 @@ possible_cod = ["COD_FUNCIONARIO", "RE", "Cod", "cod_funcionario", "cod"]
 possible_adm = ["DATA_ADMISSAO", "Admissao", "admissao", "DataAdmissao", "DATA_ADM"]
 possible_nome = ["NOME", "Nome", "nome"]
 possible_cargo = ["CARGO", "Cargo", "cargo"]
-possible_trein = ["TREINAMENTO_STATUS_GERAL", "TREINAMENTO", "DESCRICAO", "CURSO", "Treinamento"]
-possible_renov = ["DATA_RENOVACAO", "RENOVACAO", "DataRenovacao", "Data Renovação"]
+possible_trein = ["TREINAMENTO_STATUS_GERAL"]
 possible_depto = ["DEPARTAMENTO", "Departamento", "departamento"]
 possible_unidade = ["FILIAL_NOME", "Unidade", "unidade", "FILIAL"]
 
@@ -46,7 +45,6 @@ col_adm = find_col(possible_adm)
 col_nome = find_col(possible_nome)
 col_cargo = find_col(possible_cargo)
 col_trein = find_col(possible_trein)
-col_renov = find_col(possible_renov)
 col_depto = find_col(possible_depto)
 col_unidade = find_col(possible_unidade)
 
@@ -92,13 +90,9 @@ if st.button("Consultar"):
 
             if col_trein and col_trein in filtro.columns:
                 st.subheader("Treinamentos:")
-
                 df_display = filtro[[col_trein]].copy()
                 df_display[col_trein] = df_display[col_trein].astype(str)
-
                 st.dataframe(df_display.rename(columns={col_trein: "Treinamento"}))
             else:
                 st.subheader("Registros encontrados:")
                 st.dataframe(filtro)
-
-
