@@ -56,7 +56,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_por_tr
     draw.text((text_x, text_y_start+4*line_height), f"UNIDADE: {unidade}", font=font_colab, fill="black")
 
     train_x = background.width // 2 + 30
-    train_y_start = 50
+    train_y_start = 20
     max_chars = 65
 
     draw.text((train_x, train_y_start), "TREINAMENTOS POR TRILHA:", font=font_trein, fill="black")
@@ -150,4 +150,5 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
+
 
