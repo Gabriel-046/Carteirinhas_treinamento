@@ -39,6 +39,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
     try:
         font_colab = ImageFont.truetype("DejaVuSans-Bold.ttf", 20)
         font_trein = ImageFont.truetype("DejaVuSans.ttf", 15)
+        font_trein_bold = ImageFont.truetype("Montserrat-Bold.ttf", 20)
     except:
         font_colab = ImageFont.load_default()
         font_trein = ImageFont.load_default()
