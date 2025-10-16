@@ -16,7 +16,7 @@ st.markdown("""
 
 # Caminhos dos arquivos
 logo_path = "logo.webp"  # logo que será usada como "foto"
-layout_path = "apresentacao-interna (3).jpg"  # layout da carteirinha
+layout_path = "image.png"  # layout da carteirinha
 excel_path = "Treinamentos Normativos.xlsx"
 
 # Título
@@ -142,3 +142,4 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_column_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
+
