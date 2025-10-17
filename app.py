@@ -48,7 +48,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     text_x = 50
     text_y_start = 220
     line_height = 45
-    max_chars_info = 20
+    max_chars_info = 40
 
     info_pessoal = [
         f"NOME: {nome}",
@@ -67,7 +67,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
 
     train_x = 400
     train_y_start = 10
-    max_chars = 100
+    max_chars = 65
     current_y = train_y_start
 
     for treinamento in treinamentos_ordenados:
@@ -101,7 +101,7 @@ col_cargo = find_col(["CARGO", "Cargo", "cargo"])
 col_depto = find_col(["DEPARTAMENTO", "Departamento", "departamento"])
 col_unidade = find_col(["FILIAL_NOME", "Unidade", "unidade", "FILIAL"])
 col_trein = find_col(["TREINAMENTO_STATUS_GERAL"])
-col_trilha = "TRILHA DE TREINAMENTO"
+col_trilha = find_col(["TRILHA DE TREINAMENTO", "Trilha", "TRILHA", "trilha"])
 
 re_input = st.text_input("Digite seu RE:")
 admissao_input = st.text_input("Data de admissão (DD/MM/AAAA):")
@@ -116,6 +116,10 @@ if st.button("Consultar"):
         df[col_adm] = pd.to_datetime(df[col_adm]).dt.date
     except:
         st.error("Data inválida.")
+        st.stop()
+
+    if not col_trilha:
+        st.error("Coluna de trilha não encontrada na planilha.")
         st.stop()
 
     trilhas_desejadas = [
