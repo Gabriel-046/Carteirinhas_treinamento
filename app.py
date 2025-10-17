@@ -123,7 +123,7 @@ if st.button("Consultar"):
         st.stop()
 
     trilhas_desejadas = [
-        "TRILHA COMPLIANCE",
+        "TRILHA COMPLIANCE ",
         "TRILHA SEGURANÇA DO TRABALHO",
         "TRILHA SGI",
         "TRILHA TI"
@@ -151,6 +151,7 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
+
 
 
 
