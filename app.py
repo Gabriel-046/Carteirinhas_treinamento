@@ -68,7 +68,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
             current_y += line_height
 
     train_x = 500
-    train_y_start = 60
+    train_y_start = 100
     max_chars = 80
     current_y = train_y_start
 
@@ -77,7 +77,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
         for linha in linhas:
             draw.text((train_x + 15, current_y), linha, font=font_trein, fill="black")
             current_y += 20
-        current_y += 15
+        current_y += 10
 
     # Horário local de Dourados/MS
     tz = pytz.timezone("America/Campo_Grande")
@@ -189,4 +189,5 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF (Alta Resolução)", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+
 
