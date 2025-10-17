@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
-import fitz  # PyMuPDF
+from reportlab.pdfgen import canvas
 
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
@@ -85,17 +85,14 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     output_image_path = "carteirinha_final.png"
     background.save(output_image_path)
 
-    # Gerar PDF
-    pdf_path = "carteirinha_final.pdf"
-    doc = fitz.open()
-    rect = fitz.Rect(0, 0, background.width, background.height)
-    page = doc.new_page(width=rect.width, height=rect.height)
-    pix = fitz.Pixmap(output_image_path)
-    page.insert_image(rect, pixmap=pix)
-    doc.save(pdf_path)
-    doc.close()
+    # Gerar PDF com reportlab
+    output_pdf_path = "carteirinha_final.pdf"
+    c = canvas.Canvas(output_pdf_path, pagesize=(background.width, background.height))
+    c.drawImage(output_image_path, 0, 0, width=background.width, height=background.height)
+    c.showPage()
+    c.save()
 
-    return output_image_path, pdf_path
+    return output_image_path, output_pdf_path
 
 df = carregar_planilha()
 
