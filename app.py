@@ -16,7 +16,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-logo_path = "logo.webp"
+logo_path = "logo.png"
 layout_path = "image.png"
 excel_path = "Treinamentos Normativos.xlsx"
 
@@ -189,3 +189,4 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF (Alta Resolução)", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+
