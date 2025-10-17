@@ -101,7 +101,7 @@ col_cargo = find_col(["CARGO", "Cargo", "cargo"])
 col_depto = find_col(["DEPARTAMENTO", "Departamento", "departamento"])
 col_unidade = find_col(["FILIAL_NOME", "Unidade", "unidade", "FILIAL"])
 col_trein = find_col(["TREINAMENTO_STATUS_GERAL"])
-col_trilha = find_col(["TRILHA DE TREINAMENTO", "Trilha", "TRILHA", "trilha"])
+col_trilha = find_col(["TRILHA DE TREINAMENTO ", "Trilha", "TRILHA", "trilha"])
 
 re_input = st.text_input("Digite seu RE:")
 admissao_input = st.text_input("Data de admissão (DD/MM/AAAA):")
@@ -151,3 +151,4 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
+
