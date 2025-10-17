@@ -84,7 +84,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     hora_local = datetime.now(tz).strftime("%d/%m/%Y %H:%M")
 
     rodape_texto = f"Consulta em: {hora_local}"
-    rodape_x = background.width - 300
+    rodape_x = 10
     rodape_y = background.height - 30
     draw.text((rodape_x, rodape_y), rodape_texto, font=rodape_font, fill="gray")
 
@@ -109,12 +109,11 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     c = canvas.Canvas(output_pdf_path, pagesize=(width_pt, height_pt))
     c.drawImage(resized_image_path, 0, 0, width=width_pt, height=height_pt)
 
-    # Rodapé alinhado à direita
+    # Rodapé abaixo das informações do colaborador (lado esquerdo)
     c.setFont("Helvetica", 6)
     c.setFillColorRGB(0.5, 0.5, 0.5)
     text = f"Consulta em: {hora_local}"
-    text_width = c.stringWidth(text, "Helvetica", 6)
-    c.drawString(width_pt - text_width - 10, 10, text)
+    c.drawString(10, height_pt - 220, text)
 
     c.showPage()
     c.save()
