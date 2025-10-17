@@ -48,7 +48,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_por_tr
     text_x = 50
     text_y_start = 220
     line_height = 45
-    max_chars_info = 40
+    max_chars_info = 25
 
     info_pessoal = [
         f"NOME: {nome}",
@@ -158,3 +158,4 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
+
