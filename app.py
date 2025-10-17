@@ -48,12 +48,22 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_por_tr
     text_x = 50
     text_y_start = 220
     line_height = 45
+    max_chars_info = 40
 
-    draw.text((text_x, text_y_start), f"NOME: {nome}", font=font_colab, fill="black")
-    draw.text((text_x, text_y_start+line_height), f"RE: {re_input}", font=font_colab, fill="black")
-    draw.text((text_x, text_y_start+2*line_height), f"CARGO: {cargo}", font=font_colab, fill="black")
-    draw.text((text_x, text_y_start+3*line_height), f"DEPARTAMENTO: {depto}", font=font_colab, fill="black")
-    draw.text((text_x, text_y_start+4*line_height), f"UNIDADE: {unidade}", font=font_colab, fill="black")
+    info_pessoal = [
+        f"NOME: {nome}",
+        f"RE: {re_input}",
+        f"CARGO: {cargo}",
+        f"DEPARTAMENTO: {depto}",
+        f"UNIDADE: {unidade}"
+    ]
+
+    current_y = text_y_start
+    for info in info_pessoal:
+        linhas = textwrap.wrap(info, width=max_chars_info)
+        for linha in linhas:
+            draw.text((text_x, current_y), linha, font=font_colab, fill="black")
+            current_y += line_height
 
     train_x = 400  # mais à esquerda
     train_y_start = 10
@@ -96,6 +106,7 @@ col_depto = find_col(["DEPARTAMENTO", "Departamento", "departamento"])
 col_unidade = find_col(["FILIAL_NOME", "Unidade", "unidade", "FILIAL"])
 col_trein = find_col(["TREINAMENTO_STATUS_GERAL"])
 col_trilha = "TRILHA DE TREINAMENTO"  # Nome fixo da coluna
+
 re_input = st.text_input("Digite seu RE:")
 admissao_input = st.text_input("Data de admissão (DD/MM/AAAA):")
 
