@@ -4,6 +4,8 @@ from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
 from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+import pytz
 
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
@@ -77,7 +79,11 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
             current_y += 20
         current_y += 15
 
-    rodape_texto = f"Consulta em: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+    # Horário local de Dourados/MS
+    tz = pytz.timezone("America/Campo_Grande")
+    hora_local = datetime.now(tz).strftime("%d/%m/%Y %H:%M")
+
+    rodape_texto = f"Consulta em: {hora_local}"
     rodape_x = background.width - 300
     rodape_y = background.height - 30
     draw.text((rodape_x, rodape_y), rodape_texto, font=rodape_font, fill="gray")
@@ -85,10 +91,20 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     output_image_path = "carteirinha_final.png"
     background.save(output_image_path)
 
-    # Gerar PDF com reportlab
+    # Redimensionar imagem para 5,4 cm x 8,5 cm
+    width_pt = 5.4 * cm
+    height_pt = 8.5 * cm
+    resized_image = background.resize((int(width_pt), int(height_pt)))
+    resized_image_path = "resized_image.png"
+    resized_image.save(resized_image_path)
+
+    # Gerar PDF com tamanho físico correto
     output_pdf_path = "carteirinha_final.pdf"
-    c = canvas.Canvas(output_pdf_path, pagesize=(background.width, background.height))
-    c.drawImage(output_image_path, 0, 0, width=background.width, height=background.height)
+    c = canvas.Canvas(output_pdf_path, pagesize=(width_pt, height_pt))
+    c.drawImage(resized_image_path, 0, 0, width=width_pt, height=height_pt)
+    c.setFont("Helvetica", 6)
+    c.setFillColorRGB(0.5, 0.5, 0.5)
+    c.drawString(width_pt - 100, 10, f"Consulta em: {hora_local}")
     c.showPage()
     c.save()
 
@@ -162,4 +178,4 @@ if st.button("Consultar"):
         st.download_button("📥 Baixar como PNG", data=img_file, file_name="carteirinha_final.png", mime="image/png")
 
     with open(pdf_path, "rb") as pdf_file:
-        st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+        st.download_button("📄 Baixar como PDF (5,4cm x 8,5cm)", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
