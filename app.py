@@ -55,13 +55,11 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_por_tr
     draw.text((text_x, text_y_start+3*line_height), f"DEPARTAMENTO: {depto}", font=font_colab, fill="black")
     draw.text((text_x, text_y_start+4*line_height), f"UNIDADE: {unidade}", font=font_colab, fill="black")
 
-    train_x = background.width // 2 + 0
+    train_x = 400  # mais à esquerda
     train_y_start = 10
     max_chars = 65
+    current_y = train_y_start
 
-    draw.text((train_x, train_y_start), "TREINAMENTOS POR TRILHA:", font=font_trein, fill="black")
-    current_y = train_y_start + 40
-    
     for trilha, treinamentos in treinamentos_por_trilha.items():
         draw.text((train_x + 5, current_y), f"- {trilha}:", font=font_trein, fill="black")
         current_y += 25
@@ -98,7 +96,6 @@ col_depto = find_col(["DEPARTAMENTO", "Departamento", "departamento"])
 col_unidade = find_col(["FILIAL_NOME", "Unidade", "unidade", "FILIAL"])
 col_trein = find_col(["TREINAMENTO_STATUS_GERAL"])
 col_trilha = "TRILHA DE TREINAMENTO"  # Nome fixo da coluna
-
 re_input = st.text_input("Digite seu RE:")
 admissao_input = st.text_input("Data de admissão (DD/MM/AAAA):")
 
@@ -150,15 +147,3 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
-
-
-
-
-
-
-
-
-
-
-
-
