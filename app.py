@@ -59,6 +59,9 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_por_tr
     train_y_start = 10
     max_chars = 65
 
+    draw.text((train_x, train_y_start), "TREINAMENTOS POR TRILHA:", font=font_trein, fill="black")
+    current_y = train_y_start + 40
+    
     for trilha, treinamentos in treinamentos_por_trilha.items():
         draw.text((train_x + 5, current_y), f"- {trilha}:", font=font_trein, fill="black")
         current_y += 25
@@ -147,6 +150,7 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
+
 
 
 
