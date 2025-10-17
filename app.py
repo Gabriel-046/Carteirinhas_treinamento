@@ -92,8 +92,8 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     background.save(output_image_path)
 
     # Redimensionar imagem para 5,4 cm x 8,5 cm com alta resolução
-    width_pt = 5.4 * cm
-    height_pt = 8.5 * cm
+    width_pt = 8.5 * cm
+    height_pt = 5.4 * cm
     resized_image = background.resize((int(width_pt), int(height_pt)), resample=Image.LANCZOS)
     resized_image_path = "resized_image_highres.png"
     resized_image.save(resized_image_path, dpi=(300, 300))
@@ -178,4 +178,5 @@ if st.button("Consultar"):
         st.download_button("📥 Baixar como PNG", data=img_file, file_name="carteirinha_final.png", mime="image/png")
 
     with open(pdf_path, "rb") as pdf_file:
-        st.download_button("📄 Baixar como PDF (Alta Resolução)", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+        st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+
