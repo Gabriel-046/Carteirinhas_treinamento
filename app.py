@@ -91,14 +91,20 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     output_image_path = "carteirinha_final.png"
     background.save(output_image_path)
 
-    # Redimensionar imagem para 5,4 cm x 8,5 cm com alta resolução
-    width_pt = 8.5 * cm
-    height_pt = 5.4 * cm
-    resized_image = background.resize((int(width_pt), int(height_pt)), resample=Image.LANCZOS)
-    resized_image_path = "resized_image_highres.png"
-    resized_image.save(resized_image_path, dpi=(300, 300))
+    # Redimensionar imagem para 300 DPI reais
+    dpi = 300
+    width_cm = 5.4
+    height_cm = 8.5
+    width_px = int(width_cm / 2.54 * dpi)
+    height_px = int(height_cm / 2.54 * dpi)
 
-    # Gerar PDF com imagem em alta resolução
+    image_resized = background.resize((width_px, height_px), resample=Image.LANCZOS)
+    resized_image_path = "resized_image_highres.png"
+    image_resized.save(resized_image_path, dpi=(dpi, dpi))
+
+    # Criar PDF com tamanho físico correto
+    width_pt = width_cm * cm
+    height_pt = height_cm * cm
     output_pdf_path = "carteirinha_final.pdf"
     c = canvas.Canvas(output_pdf_path, pagesize=(width_pt, height_pt))
     c.drawImage(resized_image_path, 0, 0, width=width_pt, height=height_pt)
@@ -178,8 +184,4 @@ if st.button("Consultar"):
         st.download_button("📥 Baixar como PNG", data=img_file, file_name="carteirinha_final.png", mime="image/png")
 
     with open(pdf_path, "rb") as pdf_file:
-        st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
-
-
-
-
+        st.download_button("📄 Baixar como PDF (Alta Resolução)", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
