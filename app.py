@@ -118,8 +118,6 @@ if st.button("Consultar"):
         st.error("Data inválida.")
         st.stop()
 
-    filtro = df[(df[col_cod].astype(str) == str(re_input)) & (df[col_adm] == adm_date)]
-
     trilhas_desejadas = [
         "TRILHA COMPLIANCE",
         "TRILHA SEGURANÇA DO TRABALHO",
@@ -127,8 +125,11 @@ if st.button("Consultar"):
         "TRILHA TI"
     ]
 
-    if col_trilha in filtro.columns:
-        filtro = filtro[filtro[col_trilha].isin(trilhas_desejadas)]
+    filtro = df[
+        (df[col_cod].astype(str) == str(re_input)) &
+        (df[col_adm] == adm_date) &
+        (df[col_trilha].isin(trilhas_desejadas))
+    ].copy()
 
     if filtro.empty:
         st.warning("Nenhum registro encontrado.")
@@ -146,4 +147,3 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
-
