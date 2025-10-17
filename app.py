@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
+import fitz  # PyMuPDF
 
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
@@ -28,7 +29,6 @@ Formato da data: **DD/MM/AAAA**
 def carregar_planilha():
     return pd.read_excel(excel_path, sheet_name="BASE", engine="openpyxl")
 
-@st.cache_data
 def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordenados):
     background = Image.open(layout_path).convert("RGB")
     draw = ImageDraw.Draw(background)
@@ -82,9 +82,20 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     rodape_y = background.height - 30
     draw.text((rodape_x, rodape_y), rodape_texto, font=rodape_font, fill="gray")
 
-    output_path = "carteirinha_final.png"
-    background.save(output_path)
-    return output_path
+    output_image_path = "carteirinha_final.png"
+    background.save(output_image_path)
+
+    # Gerar PDF
+    pdf_path = "carteirinha_final.pdf"
+    doc = fitz.open()
+    rect = fitz.Rect(0, 0, background.width, background.height)
+    page = doc.new_page(width=rect.width, height=rect.height)
+    pix = fitz.Pixmap(output_image_path)
+    page.insert_image(rect, pixmap=pix)
+    doc.save(pdf_path)
+    doc.close()
+
+    return output_image_path, pdf_path
 
 df = carregar_planilha()
 
@@ -146,19 +157,12 @@ if st.button("Consultar"):
 
     treinamentos_ordenados = sorted(filtro[col_trein].dropna().astype(str).unique())
 
-    imagem_path = gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordenados)
+    imagem_path, pdf_path = gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordenados)
 
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
-    with open(imagem_path, "rb") as file:
-        st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
 
+    with open(imagem_path, "rb") as img_file:
+        st.download_button("📥 Baixar como PNG", data=img_file, file_name="carteirinha_final.png", mime="image/png")
 
-
-
-
-
-
-
-
-
-
+    with open(pdf_path, "rb") as pdf_file:
+        st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
