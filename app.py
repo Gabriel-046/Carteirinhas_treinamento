@@ -50,7 +50,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     text_x = 50
     text_y_start = 220
     line_height = 45
-    max_chars_info = 80
+    max_chars_info = 30
 
     info_pessoal = [
         f"NOME: {nome}",
@@ -69,7 +69,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
 
     train_x = 500
     train_y_start = 60
-    max_chars = 30
+    max_chars = 80
     current_y = train_y_start
 
     for treinamento in treinamentos_ordenados:
@@ -179,6 +179,7 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+
 
 
 
