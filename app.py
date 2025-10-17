@@ -67,7 +67,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
 
     train_x = 600
     train_y_start = 20
-    max_chars = 60
+    max_chars = 80
     current_y = train_y_start
 
     for treinamento in treinamentos_ordenados:
@@ -75,7 +75,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
         for linha in linhas:
             draw.text((train_x + 15, current_y), linha, font=font_trein, fill="black")
             current_y += 20
-        current_y += 10
+        current_y += 15
 
     rodape_texto = f"Consulta em: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
     rodape_x = background.width - 300
@@ -151,6 +151,7 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
+
 
 
 
