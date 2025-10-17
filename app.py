@@ -67,7 +67,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
 
     train_x = 600
     train_y_start = 20
-    max_chars = 80
+    max_chars = 75
     current_y = train_y_start
 
     for treinamento in treinamentos_ordenados:
@@ -151,6 +151,7 @@ if st.button("Consultar"):
     st.image(imagem_path, caption="Carteirinha Digital", use_container_width=True)
     with open(imagem_path, "rb") as file:
         st.download_button("📥 Baixar Carteirinha", data=file, file_name="carteirinha_final.png", mime="image/png")
+
 
 
 
