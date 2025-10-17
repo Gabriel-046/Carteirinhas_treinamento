@@ -93,8 +93,8 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
 
     # Redimensionar imagem para 300 DPI reais
     dpi = 300
-    width_cm = 5.4
-    height_cm = 8.5
+    width_cm = 8.5
+    height_cm = 5.4
     width_px = int(width_cm / 2.54 * dpi)
     height_px = int(height_cm / 2.54 * dpi)
 
@@ -185,3 +185,4 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF (Alta Resolução)", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+
