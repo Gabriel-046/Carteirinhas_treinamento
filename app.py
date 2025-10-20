@@ -79,7 +79,6 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
             current_y += 20
         current_y += 10
 
-    # Horário local de Dourados/MS
     tz = pytz.timezone("America/Campo_Grande")
     hora_local = datetime.now(tz).strftime("%d/%m/%Y %H:%M")
 
@@ -91,7 +90,6 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     output_image_path = "carteirinha_final.png"
     background.save(output_image_path)
 
-    # Redimensionar imagem para 300 DPI reais
     dpi = 300
     width_cm = 25.4
     height_cm = 15
@@ -102,14 +100,12 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     resized_image_path = "resized_image_highres.png"
     image_resized.save(resized_image_path, dpi=(dpi, dpi))
 
-    # Criar PDF com tamanho físico correto
     width_pt = width_cm * cm
     height_pt = height_cm * cm
     output_pdf_path = "carteirinha_final.pdf"
     c = canvas.Canvas(output_pdf_path, pagesize=(width_pt, height_pt))
     c.drawImage(resized_image_path, 0, 0, width=width_pt, height=height_pt)
 
-    # Rodapé abaixo das informações do colaborador (lado esquerdo)
     c.setFont("Helvetica", 6)
     c.setFillColorRGB(0.5, 0.5, 0.5)
     text = f"Consulta em: {hora_local}"
@@ -189,6 +185,7 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+
 
 
 
