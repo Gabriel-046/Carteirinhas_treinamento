@@ -152,14 +152,10 @@ if st.button("Consultar"):
         st.error("Coluna de trilha não encontrada na planilha.")
         st.stop()
 
-    trilhas_desejadas = [
-        "TRILHA SEGURANÇA DO TRABALHO"
-    ]
-
     filtro = df[
         (df[col_cod].astype(str) == str(re_input)) &
         (df[col_adm] == adm_date) &
-        (df[col_trilha].isin(trilhas_desejadas))
+        (df[col_trilha] == "TRILHA SEGURANÇA DO TRABALHO")
     ].copy()
 
     if filtro.empty:
@@ -182,16 +178,3 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
-
-
-
-
-
-
-
-
-
-
-
-
-
