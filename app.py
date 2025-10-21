@@ -40,8 +40,8 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
 
     try:
         font_colab = ImageFont.truetype("DejaVuSans-Bold.ttf", 20)
-        font_trein = ImageFont.truetype("DejaVuSans.ttf", 15)
-        rodape_font = ImageFont.truetype("DejaVuSans.ttf", 12)
+        font_trein = ImageFont.truetype("DejaVuSans.ttf", 18)
+        rodape_font = ImageFont.truetype("DejaVuSans.ttf", 15)
     except:
         font_colab = ImageFont.load_default()
         font_trein = ImageFont.load_default()
@@ -178,3 +178,4 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+
