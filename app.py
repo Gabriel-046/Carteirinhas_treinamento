@@ -153,10 +153,7 @@ if st.button("Consultar"):
         st.stop()
 
     trilhas_desejadas = [
-        "TRILHA COMPLIANCE ",
-        "TRILHA SEGURANÇA DO TRABALHO",
-        "TRILHA SGI",
-        "TRILHA TI"
+        "TRILHA SEGURANÇA DO TRABALHO"
     ]
 
     filtro = df[
@@ -185,6 +182,7 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+
 
 
 
