@@ -75,7 +75,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     for treinamento in treinamentos_ordenados:
         linhas = textwrap.wrap(treinamento, width=max_chars)
         for linha in linhas:
-            draw.text((train_x + 15, current_y), linha, font=font_trein, fill="black")
+            draw.text((train_x + 10, current_y), linha, font=font_trein, fill="black")
             current_y += 30
         current_y += 10
 
@@ -178,6 +178,7 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+
 
 
 
