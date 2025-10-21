@@ -69,7 +69,7 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
 
     train_x = 500
     train_y_start = 100
-    max_chars = 80
+    max_chars = 75
     current_y = train_y_start
 
     for treinamento in treinamentos_ordenados:
@@ -178,4 +178,5 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+
 
