@@ -106,11 +106,6 @@ def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordena
     c = canvas.Canvas(output_pdf_path, pagesize=(width_pt, height_pt))
     c.drawImage(resized_image_path, 0, 0, width=width_pt, height=height_pt)
 
-    c.setFont("Helvetica", 6)
-    c.setFillColorRGB(0.5, 0.5, 0.5)
-    text = f"Consulta em: {hora_local}"
-    c.drawString(10, height_pt - 220, text)
-
     c.showPage()
     c.save()
 
@@ -178,6 +173,7 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
+
 
 
 
