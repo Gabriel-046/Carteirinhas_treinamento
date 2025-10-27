@@ -12,21 +12,13 @@ import os
 # Configuração da página
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
-st.markdown("""
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    </style>
-""", unsafe_allow_html=True)
-
-# Arquivos locais
 usuarios_file = "usuarios.xlsx"
 id_colab_file = "ID_Colaborador.xlsx"
 treinamentos_file = "Treinamentos Normativos.xlsx"
 
 # Criar arquivo de usuários se não existir
 if not os.path.exists(usuarios_file):
-    pd.DataFrame(columns=["RE", "senha_hash"]).to_excel(usuarios_file, index=False)
+    pd.DataFrame([{"RE": "1", "senha_hash": hashlib.sha256("master123!".encode()).hexdigest(), "perfil": "MASTER"}]).to_excel(usuarios_file, index=False)
 
 # Funções auxiliares
 def gerar_hash(senha):
@@ -41,20 +33,34 @@ def senha_valida(senha):
         any(c in "!@#$%^&*()-_=+[]{}|;:'\",.<>?/" for c in senha)
     )
 
+def carregar_usuarios():
+    return pd.read_excel(usuarios_file)
+
+def salvar_usuarios(df):
+    df.to_excel(usuarios_file, index=False)
+
 def verificar_login(re, senha):
-    df_users = pd.read_excel(usuarios_file)
+    df_users = carregar_usuarios()
     user = df_users[df_users["RE"].astype(str) == str(re)]
     if not user.empty:
-        return gerar_hash(senha) == user.iloc[0]["senha_hash"]
-    return False
+        return gerar_hash(senha) == user.iloc[0]["senha_hash"], user.iloc[0]["perfil"]
+    return False, None
 
 def atualizar_senha(re, nova_senha):
-    df_users = pd.read_excel(usuarios_file)
+    df_users = carregar_usuarios()
     if re in df_users["RE"].astype(str).values:
         df_users.loc[df_users["RE"].astype(str) == str(re), "senha_hash"] = gerar_hash(nova_senha)
     else:
-        df_users = pd.concat([df_users, pd.DataFrame({"RE": [re], "senha_hash": [gerar_hash(nova_senha)]})])
-    df_users.to_excel(usuarios_file, index=False)
+        df_users = pd.concat([df_users, pd.DataFrame({"RE": [re], "senha_hash": [gerar_hash(nova_senha)], "perfil": ["USER"]})])
+    salvar_usuarios(df_users)
+
+def atualizar_perfil(re, perfil):
+    df_users = carregar_usuarios()
+    if re in df_users["RE"].astype(str).values:
+        df_users.loc[df_users["RE"].astype(str) == str(re), "perfil"] = perfil
+    else:
+        df_users = pd.concat([df_users, pd.DataFrame({"RE": [re], "senha_hash": [""], "perfil": [perfil]})])
+    salvar_usuarios(df_users)
 
 # Interface principal
 aba = st.radio("Selecione a opção:", ["Login", "Primeiro acesso / Recuperar senha"])
@@ -64,9 +70,11 @@ if aba == "Login":
     re = st.text_input("RE")
     senha = st.text_input("Senha", type="password")
     if st.button("Entrar"):
-        if verificar_login(re, senha):
+        ok, perfil = verificar_login(re, senha)
+        if ok:
             st.session_state["usuario_logado"] = re
-            st.success("Login bem-sucedido!")
+            st.session_state["perfil"] = perfil
+            st.success(f"Login bem-sucedido! Perfil: {perfil}")
         else:
             st.error("RE ou senha inválidos.")
 
@@ -100,11 +108,27 @@ elif aba == "Primeiro acesso / Recuperar senha":
                     atualizar_senha(re_colab, nova_senha)
                     st.success("Senha criada/atualizada com sucesso! Volte para a aba Login.")
 
-# Se logado, mostrar geração da carteirinha
+# Após login
 if "usuario_logado" in st.session_state:
+    perfil = st.session_state["perfil"]
     st.title("Carteirinha Digital de Treinamento")
-    st.markdown("Preencha **RE** e **Data de Admissão** para gerar sua carteirinha. Formato: **DD/MM/AAAA**")
 
+    # Painel MASTER para definir perfis
+    if perfil == "MASTER":
+        st.subheader("⚙️ Gerenciar Perfis")
+        re_alvo = st.text_input("RE para alterar perfil")
+        novo_perfil = st.selectbox("Novo perfil", ["USER", "ADM", "MASTER"])
+        if st.button("Atualizar perfil"):
+            atualizar_perfil(re_alvo, novo_perfil)
+            st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
+
+    # Escolher RE para consultar carteirinha
+    if perfil in ["MASTER", "ADM"]:
+        re_consulta = st.text_input("Digite o RE para consultar carteirinha")
+    else:
+        re_consulta = st.session_state["usuario_logado"]
+
+    # Geração da carteirinha
     @st.cache_data
     def carregar_planilha():
         return pd.read_excel(treinamentos_file, sheet_name="BASE", engine="openpyxl")
@@ -125,6 +149,7 @@ if "usuario_logado" in st.session_state:
             for linha in textwrap.wrap(info, width=30):
                 draw.text((text_x, text_y_start), linha, font=font_colab, fill="#304F7E")
                 text_y_start += line_height
+
         train_x, train_y_start = 500, 100
         for treinamento in treinamentos_ordenados:
             for linha in textwrap.wrap(treinamento, width=70):
@@ -155,32 +180,19 @@ if "usuario_logado" in st.session_state:
     col_trein = next((c for c in ["TREINAMENTO_STATUS_GERAL"] if c in df.columns), None)
     col_trilha = next((c for c in ["TRILHA DE TREINAMENTO ","Trilha","TRILHA","trilha"] if c in df.columns), None)
 
-    re_input = st.text_input("Digite seu RE:")
-    admissao_input = st.text_input("Data de admissão (DD/MM/AAAA):")
-
-    if st.button("Consultar"):
-        if not re_input or not admissao_input:
-            st.error("Preencha todos os campos.")
-            st.stop()
-        try:
-            adm_date = datetime.strptime(admissao_input, "%d/%m/%Y").date()
-            df[col_adm] = pd.to_datetime(df[col_adm]).dt.date
-        except:
-            st.error("Data inválida.")
-            st.stop()
-        filtro = df[(df[col_cod].astype(str) == str(re_input)) & (df[col_adm] == adm_date) & (df[col_trilha] == "TRILHA SEGURANÇA DO TRABALHO")]
+    if st.button("Gerar Carteirinha"):
+        filtro = df[(df[col_cod].astype(str) == str(re_consulta)) & (df[col_trilha] == "TRILHA SEGURANÇA DO TRABALHO")]
         if filtro.empty:
             st.warning("Nenhum registro encontrado.")
-            st.stop()
-        nome = filtro.iloc[0][col_nome]
-        cargo = filtro.iloc[0][col_cargo] if col_cargo else ""
-        depto = filtro.iloc[0][col_depto] if col_depto else ""
-        unidade = filtro.iloc[0][col_unidade] if col_unidade else ""
-        treinamentos_ordenados = sorted(filtro[col_trein].dropna().astype(str).unique())
-        img_path, pdf_path = gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos_ordenados)
-        st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
-        with open(img_path, "rb") as img_file:
-            st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
-        with open(pdf_path, "rb") as pdf_file:
-            st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
-
+        else:
+            nome = filtro.iloc[0][col_nome]
+            cargo = filtro.iloc[0][col_cargo] if col_cargo else ""
+            depto = filtro.iloc[0][col_depto] if col_depto else ""
+            unidade = filtro.iloc[0][col_unidade] if col_unidade else ""
+            treinamentos_ordenados = sorted(filtro[col_trein].dropna().astype(str).unique())
+            img_path, pdf_path = gerar_carteirinha(nome, re_consulta, cargo, depto, unidade, treinamentos_ordenados)
+            st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
+            with open(img_path, "rb") as img_file:
+                st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
+            with open(pdf_path, "rb") as pdf_file:
+                st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
