@@ -1,5 +1,8 @@
 streamlit
 pandas
-openpyxl
-Pillow
+pillow
 reportlab
+pytz
+pyodbc
+bcrypt
+openpyxl
