@@ -124,22 +124,15 @@ if "usuario_logado" in st.session_state and "perfil" in st.session_state:
     perfil = st.session_state["perfil"]
     st.title("Carteirinha Digital de Treinamento")
 
-    # Painel MASTER para definir perfis
+    # Definir abas conforme perfil
     if perfil == "MASTER":
-        st.subheader("⚙️ Gerenciar Perfis")
-        re_alvo = st.text_input("RE para alterar perfil")
-        novo_perfil = st.selectbox("Novo perfil", ["USER", "ADM", "MASTER"])
-        if st.button("Atualizar perfil"):
-            atualizar_perfil(re_alvo, novo_perfil)
-            st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
-
-    # Escolher RE para consultar carteirinha
-    if perfil in ["MASTER", "ADM"]:
-        re_consulta = st.text_input("Digite o RE para consultar carteirinha")
+        tabs = st.tabs(["Minha Carteirinha", "Gerar Carteirinha de Outro", "Gerenciar Perfis"])
+    elif perfil == "ADM":
+        tabs = st.tabs(["Minha Carteirinha", "Gerar Carteirinha de Outro"])
     else:
-        re_consulta = st.session_state["usuario_logado"]
+        tabs = st.tabs(["Minha Carteirinha"])
 
-    # Geração da carteirinha
+    # Função para gerar carteirinha
     @st.cache_data
     def carregar_planilha():
         return pd.read_excel(treinamentos_file, sheet_name="BASE", engine="openpyxl")
@@ -190,19 +183,55 @@ if "usuario_logado" in st.session_state and "perfil" in st.session_state:
     col_trein = next((c for c in ["TREINAMENTO_STATUS_GERAL"] if c in df.columns), None)
     col_trilha = next((c for c in ["TRILHA DE TREINAMENTO ","Trilha","TRILHA","trilha"] if c in df.columns), None)
 
-    if st.button("Gerar Carteirinha"):
-        filtro = df[(df[col_cod].astype(str) == str(re_consulta)) & (df[col_trilha] == "TRILHA SEGURANÇA DO TRABALHO")]
-        if filtro.empty:
-            st.warning("Nenhum registro encontrado.")
-        else:
-            nome = filtro.iloc[0][col_nome]
-            cargo = filtro.iloc[0][col_cargo] if col_cargo else ""
-            depto = filtro.iloc[0][col_depto] if col_depto else ""
-            unidade = filtro.iloc[0][col_unidade] if col_unidade else ""
-            treinamentos_ordenados = sorted(filtro[col_trein].dropna().astype(str).unique())
-            img_path, pdf_path = gerar_carteirinha(nome, re_consulta, cargo, depto, unidade, treinamentos_ordenados)
-            st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
-            with open(img_path, "rb") as img_file:
-                st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
-            with open(pdf_path, "rb") as pdf_file:
-                st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
+    # Aba Minha Carteirinha
+    with tabs[0]:
+        st.subheader("Minha Carteirinha")
+        re_consulta = st.session_state["usuario_logado"]
+        if st.button("Gerar Minha Carteirinha"):
+            filtro = df[(df[col_cod].astype(str) == str(re_consulta)) & (df[col_trilha] == "TRILHA SEGURANÇA DO TRABALHO")]
+            if filtro.empty:
+                st.warning("Nenhum registro encontrado.")
+            else:
+                nome = filtro.iloc[0][col_nome]
+                cargo = filtro.iloc[0][col_cargo] if col_cargo else ""
+                depto = filtro.iloc[0][col_depto] if col_depto else ""
+                unidade = filtro.iloc[0][col_unidade] if col_unidade else ""
+                treinamentos_ordenados = sorted(filtro[col_trein].dropna().astype(str).unique())
+                img_path, pdf_path = gerar_carteirinha(nome, re_consulta, cargo, depto, unidade, treinamentos_ordenados)
+                st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
+                with open(img_path, "rb") as img_file:
+                    st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
+                with open(pdf_path, "rb") as pdf_file:
+                    st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
+
+    # Aba Gerar Carteirinha de Outro
+    if perfil in ["MASTER", "ADM"]:
+        with tabs[1]:
+            st.subheader("Gerar Carteirinha de Outro Colaborador")
+            re_outro = st.text_input("Digite o RE do colaborador")
+            if st.button("Gerar Carteirinha de Outro"):
+                filtro = df[(df[col_cod].astype(str) == str(re_outro)) & (df[col_trilha] == "TRILHA SEGURANÇA DO TRABALHO")]
+                if filtro.empty:
+                    st.warning("Nenhum registro encontrado.")
+                else:
+                    nome = filtro.iloc[0][col_nome]
+                    cargo = filtro.iloc[0][col_cargo] if col_cargo else ""
+                    depto = filtro.iloc[0][col_depto] if col_depto else ""
+                    unidade = filtro.iloc[0][col_unidade] if col_unidade else ""
+                    treinamentos_ordenados = sorted(filtro[col_trein].dropna().astype(str).unique())
+                    img_path, pdf_path = gerar_carteirinha(nome, re_outro, cargo, depto, unidade, treinamentos_ordenados)
+                    st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
+                    with open(img_path, "rb") as img_file:
+                        st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
+                    with open(pdf_path, "rb") as pdf_file:
+                        st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
+
+    # Aba Gerenciar Perfis
+    if perfil == "MASTER":
+        with tabs[2]:
+            st.subheader("Gerenciar Perfis")
+            re_alvo = st.text_input("RE para alterar perfil")
+            novo_perfil = st.selectbox("Novo perfil", ["USER", "ADM", "MASTER"])
+            if st.button("Atualizar perfil"):
+                atualizar_perfil(re_alvo, novo_perfil)
+                st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
