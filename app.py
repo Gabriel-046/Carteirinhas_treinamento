@@ -6,7 +6,10 @@ import textwrap
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
 import pytz
+import bcrypt
+import pyodbc
 
+# Configurações da página
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
 st.markdown("""
@@ -16,6 +19,51 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Funções de banco de dados
+
+def conectar_sql():
+    return pyodbc.connect(
+        "DRIVER={SQL Server};SERVER=SEU_SERVIDOR;DATABASE=SEU_BANCO;UID=SEU_USUARIO;PWD=SUA_SENHA"
+    )
+
+def verificar_login(re, senha):
+    conn = conectar_sql()
+    cursor = conn.cursor()
+    cursor.execute("SELECT senha_hash FROM usuarios WHERE re = ?", re)
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        senha_hash = row[0]
+        return bcrypt.checkpw(senha.encode(), senha_hash.encode())
+    return False
+
+def registrar_acesso(re, acao):
+    conn = conectar_sql()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO log_acessos (re, data_hora, acao) VALUES (?, ?, ?)",
+                   re, datetime.now(), acao)
+    conn.commit()
+    conn.close()
+
+# Tela de login
+
+def tela_login():
+    st.subheader("🔐 Login")
+    re = st.text_input("RE")
+    senha = st.text_input("Senha", type="password")
+    if st.button("Entrar"):
+        if verificar_login(re, senha):
+            st.session_state["usuario_logado"] = re
+            registrar_acesso(re, "Login realizado")
+            st.success("Login bem-sucedido!")
+        else:
+            st.error("RE ou senha inválidos.")
+
+if "usuario_logado" not in st.session_state:
+    tela_login()
+    st.stop()
+
+# Após login, segue o app da carteirinha
 logo_path = "logo.png"
 layout_path = "image.png"
 excel_path = "Treinamentos Normativos.xlsx"
@@ -173,11 +221,3 @@ if st.button("Consultar"):
 
     with open(pdf_path, "rb") as pdf_file:
         st.download_button("📄 Baixar como PDF", data=pdf_file, file_name="carteirinha_final.pdf", mime="application/pdf")
-
-
-
-
-
-
-
-
