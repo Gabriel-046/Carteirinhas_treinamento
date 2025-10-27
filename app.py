@@ -183,4 +183,4 @@ if "usuario_logado" in st.session_state:
             st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
         with open(pdf_path, "rb") as pdf_file:
             st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
-``
+
