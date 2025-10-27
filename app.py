@@ -16,10 +16,6 @@ usuarios_file = "usuarios.xlsx"
 id_colab_file = "ID_Colaborador.xlsx"
 treinamentos_file = "Treinamentos Normativos.xlsx"
 
-# Criar arquivo de usuários se não existir
-if not os.path.exists(usuarios_file):
-    pd.DataFrame([{"RE": "1", "senha_hash": hashlib.sha256("master123!".encode()).hexdigest(), "perfil": "MASTER"}]).to_excel(usuarios_file, index=False)
-
 # Funções auxiliares
 def gerar_hash(senha):
     return hashlib.sha256(senha.encode()).hexdigest()
@@ -61,6 +57,21 @@ def atualizar_perfil(re, perfil):
     else:
         df_users = pd.concat([df_users, pd.DataFrame({"RE": [re], "senha_hash": [""], "perfil": [perfil]})])
     salvar_usuarios(df_users)
+
+# Inicialização do arquivo de usuários
+if not os.path.exists(usuarios_file):
+    df_init = pd.DataFrame([{
+        "RE": "1",
+        "senha_hash": gerar_hash("master123!"),
+        "perfil": "MASTER"
+    }])
+    df_init.to_excel(usuarios_file, index=False)
+else:
+    df_users = pd.read_excel(usuarios_file)
+    if "perfil" not in df_users.columns:
+        df_users["perfil"] = "USER"
+        df_users.loc[df_users["RE"].astype(str) == "1", "perfil"] = "MASTER"
+        df_users.to_excel(usuarios_file, index=False)
 
 # Interface principal
 aba = st.radio("Selecione a opção:", ["Login", "Primeiro acesso / Recuperar senha"])
