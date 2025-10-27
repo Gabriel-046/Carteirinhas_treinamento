@@ -109,7 +109,7 @@ elif aba == "Primeiro acesso / Recuperar senha":
                     st.success("Senha criada/atualizada com sucesso! Volte para a aba Login.")
 
 # Após login
-if "usuario_logado" in st.session_state:
+if "usuario_logado" in st.session_state and "perfil" in st.session_state:
     perfil = st.session_state["perfil"]
     st.title("Carteirinha Digital de Treinamento")
 
@@ -172,7 +172,6 @@ if "usuario_logado" in st.session_state:
 
     df = carregar_planilha()
     col_cod = next((c for c in ["COD_FUNCIONARIO","RE","Cod","cod_funcionario","cod"] if c in df.columns), None)
-    col_adm = next((c for c in ["DATA_ADMISSAO","Admissao","admissao","DataAdmissao","DATA_ADM"] if c in df.columns), None)
     col_nome = next((c for c in ["NOME","Nome","nome"] if c in df.columns), None)
     col_cargo = next((c for c in ["CARGO","Cargo","cargo"] if c in df.columns), None)
     col_depto = next((c for c in ["DEPARTAMENTO","Departamento","departamento"] if c in df.columns), None)
