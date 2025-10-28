@@ -169,8 +169,8 @@ elif st.session_state["pagina"] == "principal":
             background.paste(logo, (50, 30))
 
         try:
-            font_info = ImageFont.truetype("DejaVuSans-Bold.ttf", 25)
-            font_trein = ImageFont.truetype("DejaVuSans.ttf", 18)
+            font_info = ImageFont.truetype("DejaVuSans-Bold.ttf", 20)
+            font_trein = ImageFont.truetype("DejaVuSans.ttf", 15)
         except:
             font_info = ImageFont.load_default()
             font_trein = ImageFont.load_default()
@@ -179,6 +179,7 @@ elif st.session_state["pagina"] == "principal":
         info_x = 50
         info_y = 200
         line_height_info = 40
+        max_width = 30
         info = [
             f"NOME: {nome}",
             f"RE: {re_input}",
@@ -193,7 +194,7 @@ elif st.session_state["pagina"] == "principal":
         # Treinamentos à direita
         train_x = 500
         train_y = 100
-        max_width = 80
+        max_width = 75
         for t in treinamentos:
             linhas = textwrap.wrap(t, width=max_width)
             for linha in linhas:
