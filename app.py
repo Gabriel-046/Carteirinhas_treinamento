@@ -8,7 +8,7 @@ from reportlab.lib.units import cm
 import hashlib
 import os
 import textwrap
-from unidecode import unidecode
+import unicodedata
 
 # Configuração da página
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
@@ -130,6 +130,9 @@ elif st.session_state["pagina"] == "principal":
         df.columns = df.columns.str.strip()
         return df
 
+    def remover_acentos(texto):
+        return unicodedata.normalize('NFKD', texto).encode('ascii', 'ignore').decode('utf-8')
+
     def buscar_treinamentos(df, re_consulta):
         col_cod = "COD_FUNCIONARIO"
         col_nome = "NOME"
@@ -141,7 +144,7 @@ elif st.session_state["pagina"] == "principal":
 
         # Normalização
         df[col_cod] = df[col_cod].astype(str).str.strip()
-        df[col_trilha] = df[col_trilha].apply(lambda x: unidecode(str(x)).upper().strip())
+        df[col_trilha] = df[col_trilha].apply(lambda x: remover_acentos(str(x)).upper().strip())
         df[col_trein] = df[col_trein].astype(str).str.strip()
 
         re_consulta = str(re_consulta).strip()
