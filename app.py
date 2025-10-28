@@ -169,8 +169,8 @@ elif st.session_state["pagina"] == "principal":
             background.paste(logo, (50, 30))
 
         try:
-            font_info = ImageFont.truetype("Montserrat.ttf", 25)
-            font_trein = ImageFont.truetype("Montserrat.ttf", 18)
+            font_info = ImageFont.truetype("DejaVuSans-Bold.ttf", 25)
+            font_trein = ImageFont.truetype("DejaVuSans.ttf", 18)
         except:
             font_info = ImageFont.load_default()
             font_trein = ImageFont.load_default()
