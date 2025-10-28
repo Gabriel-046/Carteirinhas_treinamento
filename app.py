@@ -188,7 +188,7 @@ if "usuario_logado" in st.session_state and "perfil" in st.session_state:
     col_depto = next((c for c in ["DEPARTAMENTO","Departamento","departamento"] if c in df.columns), None)
     col_unidade = next((c for c in ["FILIAL_NOME","Unidade","unidade","FILIAL"] if c in df.columns), None)
     col_trein = next((c for c in ["TREINAMENTO_STATUS_GERAL"] if c in df.columns), None)
-    col_trilha = next((c for c in ["TRILHA DE TREINAMENTO ","Trilha","TRILHA","trilha"] if c in df.columns), None)
+    col_trilha = next((c for c in ["TRILHA DE TREINAMENTO","Trilha","TRILHA","trilha"] if c in df.columns), None)
 
     # Aba Minha Carteirinha
     with tabs[0]:
