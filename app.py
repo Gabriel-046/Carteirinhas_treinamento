@@ -1,3 +1,133 @@
+import streamlit as st
+import pandas as pd
+from datetime import datetime
+from PIL import Image, ImageDraw, ImageFont
+import pytz
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+import hashlib
+import os
+import textwrap
+
+st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
+
+# ===================== Funções de Usuário =====================
+
+usuarios_file = "usuarios.xlsx"
+
+def gerar_hash(senha):
+    return hashlib.sha256(senha.encode()).hexdigest()
+
+def senha_valida(senha):
+    return (
+        len(senha) >= 10 and
+        any(c.isupper() for c in senha) and
+        any(c.islower() for c in senha) and
+        any(c.isdigit() for c in senha) and
+        any(c in "!@#$%^&*()-_=+[]{};:'\\\",.<>?/" for c in senha)
+    )
+
+def carregar_usuarios():
+    if os.path.exists(usuarios_file):
+        return pd.read_excel(usuarios_file, engine="openpyxl")
+    else:
+        return pd.DataFrame(columns=["RE", "senha_hash", "perfil"])
+
+def salvar_usuarios(df):
+    df.to_excel(usuarios_file, index=False)
+
+def verificar_login(re, senha):
+    df_users = carregar_usuarios()
+    user = df_users[df_users["RE"].astype(str) == str(re)]
+    if not user.empty:
+        return gerar_hash(senha) == user.iloc[0]["senha_hash"], user.iloc[0]["perfil"]
+    return False, None
+
+def atualizar_senha(re, nova_senha):
+    if str(re) == "0001":
+        return  # Não permite alteração da senha do MASTER fixo
+    df_users = carregar_usuarios()
+    if str(re) in df_users["RE"].astype(str).values:
+        df_users.loc[df_users["RE"].astype(str) == str(re), "senha_hash"] = gerar_hash(nova_senha)
+    else:
+        novo_usuario = pd.DataFrame({"RE": [re], "senha_hash": [gerar_hash(nova_senha)], "perfil": ["USER"]})
+        df_users = pd.concat([df_users, novo_usuario], ignore_index=True)
+    salvar_usuarios(df_users)
+
+def atualizar_perfil(re, perfil):
+    df_users = carregar_usuarios()
+    if str(re) in df_users["RE"].astype(str).values:
+        df_users.loc[df_users["RE"].astype(str) == str(re), "perfil"] = perfil
+    else:
+        novo_usuario = pd.DataFrame({"RE": [re], "senha_hash": [""], "perfil": [perfil]})
+        df_users = pd.concat([df_users, novo_usuario], ignore_index=True)
+    salvar_usuarios(df_users)
+
+# ===================== Inicialização =====================
+
+df_users = carregar_usuarios()
+if "0001" not in df_users["RE"].astype(str).values:
+    novo_master = pd.DataFrame([
+        {"RE": "0001", "senha_hash": gerar_hash("Master0001@"), "perfil": "MASTER"}
+    ])
+    df_users = pd.concat([df_users, novo_master], ignore_index=True)
+    salvar_usuarios(df_users)
+
+if "pagina" not in st.session_state:
+    st.session_state["pagina"] = "login"
+
+# ===================== Página de Login =====================
+
+if st.session_state["pagina"] == "login":
+    st.title("🔐 Login")
+    re = st.text_input("RE")
+    senha = st.text_input("Senha", type="password")
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("Entrar"):
+            ok, perfil = verificar_login(re, senha)
+            if ok:
+                st.session_state["usuario_logado"] = re
+                st.session_state["perfil"] = perfil
+                st.session_state["pagina"] = "principal"
+                st.success("Login realizado com sucesso!")
+            else:
+                st.error("RE ou senha inválidos.")
+    with col2:
+        if st.button("Redefinir senha"):
+            st.session_state["pagina"] = "redefinir"
+
+# ===================== Página de Redefinição =====================
+
+elif st.session_state["pagina"] == "redefinir":
+    st.title("🔑 Redefinir Senha")
+    re_input = st.text_input("Digite seu RE")
+    nova_senha = st.text_input("Nova senha", type="password")
+    confirmar_senha = st.text_input("Confirme a senha", type="password")
+    if st.button("Atualizar senha"):
+        if not re_input or not nova_senha or not confirmar_senha:
+            st.error("Preencha todos os campos.")
+        elif nova_senha != confirmar_senha:
+            st.error("As senhas não coincidem.")
+        elif not senha_valida(nova_senha):
+            st.error("A senha deve conter números, letras maiúsculas e minúsculas, caracteres especiais e no mínimo 10 caracteres.")
+        elif re_input == "0001":
+            st.error("A senha do usuário MASTER não pode ser redefinida.")
+        else:
+            atualizar_senha(re_input, nova_senha)
+            st.success("Senha atualizada com sucesso!")
+            st.session_state["pagina"] = "login"
+
+# ===================== Página Principal =====================
+
+elif st.session_state["pagina"] == "principal":
+    perfil = st.session_state["perfil"]
+    st.title("Carteirinha Digital de Treinamento")
+    if st.button("🚪 Logout"):
+        st.session_state.clear()
+        st.session_state["pagina"] = "login"
+
+    # Aqui segue o restante do seu código de carteirinha, tabs, etc.
 usuarios_file = "usuarios.xlsx"
 
 def gerar_hash(senha):
