@@ -179,7 +179,7 @@ elif st.session_state["pagina"] == "principal":
         info_x = 50
         info_y = 200
         line_height_info = 40
-        max_chars_info = 15
+        max_chars_info = 20
         info = [
             f"NOME: {nome}",
             f"RE: {re_input}",
