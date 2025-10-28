@@ -181,7 +181,7 @@ elif st.session_state["pagina"] == "principal":
                 draw.text((info_x, info_y), parte, font=font_info, fill="#304F7E")
                 info_y += line_height_info
 
-        train_x = 500
+        train_x = 400
         train_y = 100
         max_width = 75
         for t in treinamentos:
