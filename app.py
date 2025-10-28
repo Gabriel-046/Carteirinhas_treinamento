@@ -25,7 +25,7 @@ def senha_valida(senha):
         any(c.isupper() for c in senha) and
         any(c.islower() for c in senha) and
         any(c.isdigit() for c in senha) and
-        any(c in "!@#$%^&*()-_=+[]{};:'\\\",.<>?/\" for c in senha)
+        any(c in """!@#$%^&*()-_=+[]{};:'\\",.<>?/""" for c in senha)
     )
 
 def carregar_usuarios():
