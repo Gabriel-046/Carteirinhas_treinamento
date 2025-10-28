@@ -1,3 +1,37 @@
+usuarios_file = "usuarios.xlsx"
+
+def gerar_hash(senha):
+    return hashlib.sha256(senha.encode()).hexdigest()
+
+def carregar_usuarios():
+    if os.path.exists(usuarios_file):
+        return pd.read_excel(usuarios_file, engine="openpyxl")
+    else:
+        return pd.DataFrame(columns=["RE", "senha_hash", "perfil"])
+
+def salvar_usuarios(df):
+    df.to_excel(usuarios_file, index=False)
+
+def atualizar_senha(re, nova_senha):
+    if str(re) == "0001":
+        return  # Não permite alteração da senha do MASTER fixo
+    df_users = carregar_usuarios()
+    if str(re) in df_users["RE"].astype(str).values:
+        df_users.loc[df_users["RE"].astype(str) == str(re), "senha_hash"] = gerar_hash(nova_senha)
+    else:
+        novo_usuario = pd.DataFrame({"RE": [re], "senha_hash": [gerar_hash(nova_senha)], "perfil": ["USER"]})
+        df_users = pd.concat([df_users, novo_usuario], ignore_index=True)
+    salvar_usuarios(df_users)
+
+# Verifica se o usuário MASTER fixo existe, senão cria
+df_users = carregar_usuarios()
+if "0001" not in df_users["RE"].astype(str).values:
+    novo_master = pd.DataFrame([
+        {"RE": "0001", "senha_hash": gerar_hash("Master0001@"), "perfil": "MASTER"}
+    ])
+    df_users = pd.concat([df_users, novo_master], ignore_index=True)
+    salvar_usuarios(df_users)
+
 import streamlit as st
 import pandas as pd
 from datetime import datetime
