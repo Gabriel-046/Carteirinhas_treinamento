@@ -239,3 +239,4 @@ if "usuario_logado" in st.session_state and "perfil" in st.session_state:
                 atualizar_perfil(re_alvo, novo_perfil)
                 st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
 
+
