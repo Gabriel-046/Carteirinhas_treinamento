@@ -179,7 +179,7 @@ elif st.session_state["pagina"] == "principal":
         info_x = 50
         info_y = 200
         line_height_info = 40
-        max_width = 30
+        max_width = 20
         info = [
             f"NOME: {nome}",
             f"RE: {re_input}",
@@ -194,7 +194,7 @@ elif st.session_state["pagina"] == "principal":
         # Treinamentos à direita
         train_x = 500
         train_y = 100
-        max_width = 75
+        max_width = 80
         for t in treinamentos:
             linhas = textwrap.wrap(t, width=max_width)
             for linha in linhas:
