@@ -188,7 +188,10 @@ if "usuario_logado" in st.session_state and "perfil" in st.session_state:
         st.subheader("Minha Carteirinha")
         re_consulta = st.session_state["usuario_logado"]
         if st.button("Gerar Minha Carteirinha"):
-            filtro = df[(df[col_cod].astype(str) == str(re_consulta)) & (df[col_trilha] == "TRILHA SEGURANÇA DO TRABALHO")]
+            filtro = df[
+    (df[col_cod].astype(str).str.strip() == str(re_consulta).strip()) &
+    (df[col_trilha].astype(str).str.upper().str.contains("TRILHA SEGURANÇA DO TRABALHO"))
+]
             if filtro.empty:
                 st.warning("Nenhum registro encontrado.")
             else:
@@ -235,5 +238,6 @@ if "usuario_logado" in st.session_state and "perfil" in st.session_state:
             if st.button("Atualizar perfil"):
                 atualizar_perfil(re_alvo, novo_perfil)
                 st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
+
 
 
