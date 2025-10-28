@@ -13,7 +13,6 @@ import os
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
 usuarios_file = "usuarios.xlsx"
-id_colab_file = "ID_Colaborador.xlsx"
 treinamentos_file = "Treinamentos Normativos.xlsx"
 
 # Funções auxiliares
@@ -91,33 +90,20 @@ if aba == "Login":
 
 elif aba == "Primeiro acesso / Recuperar senha":
     st.subheader("🔑 Criar ou recuperar senha")
-    cpf = st.text_input("CPF")
-    codigo = st.text_input("Código verificador (3 primeiros dígitos do CPF + ano nascimento + RE)")
-    nascimento = st.date_input("Data de nascimento")
+    re_input = st.text_input("Digite seu RE")
     nova_senha = st.text_input("Nova senha", type="password")
     confirmar_senha = st.text_input("Confirme a senha", type="password")
 
     if st.button("Criar/Atualizar senha"):
-        if not cpf or not codigo or not nascimento or not nova_senha or not confirmar_senha:
+        if not re_input or not nova_senha or not confirmar_senha:
             st.error("Preencha todos os campos.")
         elif nova_senha != confirmar_senha:
             st.error("As senhas não coincidem.")
         elif not senha_valida(nova_senha):
             st.error("A senha deve conter números, letras maiúsculas e minúsculas, caracteres especiais e no mínimo 10 caracteres.")
         else:
-            df_id = pd.read_excel(id_colab_file)
-            col_re, col_cpf, col_nasc = "COD_FUNCIONARIO", "CPF", "DATA_NASCIMENTO"
-            colaborador = df_id[(df_id[col_cpf].astype(str) == str(cpf)) & (pd.to_datetime(df_id[col_nasc]).dt.date == nascimento)]
-            if colaborador.empty:
-                st.error("Dados não encontrados.")
-            else:
-                re_colab = str(colaborador.iloc[0][col_re])
-                codigo_correto = cpf[:3] + str(nascimento.year) + re_colab
-                if codigo != codigo_correto:
-                    st.error("Código verificador inválido.")
-                else:
-                    atualizar_senha(re_colab, nova_senha)
-                    st.success("Senha criada/atualizada com sucesso! Volte para a aba Login.")
+            atualizar_senha(re_input, nova_senha)
+            st.success("Senha criada/atualizada com sucesso! Volte para a aba Login.")
 
 # Após login
 if "usuario_logado" in st.session_state and "perfil" in st.session_state:
@@ -195,7 +181,6 @@ if "usuario_logado" in st.session_state and "perfil" in st.session_state:
         c.showPage()
         c.save()
         return output_image_path, output_pdf_path
-
     df = carregar_planilha()
     col_cod = next((c for c in ["COD_FUNCIONARIO","RE","Cod","cod_funcionario","cod"] if c in df.columns), None)
     col_nome = next((c for c in ["NOME","Nome","nome"] if c in df.columns), None)
@@ -253,4 +238,3 @@ if "usuario_logado" in st.session_state and "perfil" in st.session_state:
             if st.button("Atualizar perfil"):
                 atualizar_perfil(re_alvo, novo_perfil)
                 st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
-
