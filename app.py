@@ -8,7 +8,6 @@ from reportlab.lib.units import cm
 import hashlib
 import os
 import textwrap
-
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
 usuarios_file = "usuarios.xlsx"
@@ -176,23 +175,23 @@ elif st.session_state["pagina"] == "principal":
             font_info = ImageFont.load_default()
             font_trein = ImageFont.load_default()
 
-        # Limite de caracteres
-        max_chars_info = 20
-
-        # Informações pessoais à esquerda
+        # Informações pessoais com quebra de linha
         info_x = 50
         info_y = 200
         line_height_info = 45
+        max_width_info = 20
         info = [
-            f"NOME: {nome[:max_chars_info]}",
-            f"RE: {re_input[:max_chars_info]}",
-            f"CARGO: {cargo[:max_chars_info]}",
-            f"DEPARTAMENTO: {depto[:max_chars_info]}",
-            f"UNIDADE: {unidade[:max_chars_info]}"
+            f"NOME: {nome}",
+            f"RE: {re_input}",
+            f"CARGO: {cargo}",
+            f"DEPARTAMENTO: {depto}",
+            f"UNIDADE: {unidade}"
         ]
         for linha in info:
-            draw.text((info_x, info_y), linha, font=font_info, fill="#304F7E")
-            info_y += line_height_info
+            linhas_quebradas = textwrap.wrap(linha, width=max_width_info)
+            for parte in linhas_quebradas:
+                draw.text((info_x, info_y), parte, font=font_info, fill="#304F7E")
+                info_y += line_height_info
 
         # Treinamentos à direita
         train_x = 500
