@@ -8,6 +8,7 @@ from reportlab.lib.units import cm
 import hashlib
 import os
 import textwrap
+
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
 usuarios_file = "usuarios.xlsx"
@@ -130,8 +131,6 @@ elif st.session_state["pagina"] == "principal":
         col_depto = "DEPARTAMENTO"
         col_unidade = "FILIAL_NOME"
         col_trein = "TREINAMENTO_STATUS_GERAL"
-        col_desc = "DESCRICAO"
-        col_data = "DATA_CURSO"
 
         df[col_cod] = df[col_cod].astype(str).str.strip()
         re_consulta = str(re_consulta).strip()
@@ -146,15 +145,8 @@ elif st.session_state["pagina"] == "principal":
         depto = filtro.iloc[0][col_depto]
         unidade = filtro.iloc[0][col_unidade]
 
-        treinamentos = []
-        for _, row in filtro.iterrows():
-            descricao = row[col_desc] if col_desc in filtro.columns else ""
-            status = row[col_trein] if col_trein in filtro.columns else ""
-            vencimento = row[col_data] if col_data in filtro.columns and pd.notnull(row[col_data]) else ""
-            texto = f"{descricao} - {status}"
-            if vencimento:
-                texto += f" - vence em {vencimento.strftime('%d/%m/%Y')}"
-            treinamentos.append(texto)
+        # Apenas coluna TREINAMENTO_STATUS_GERAL
+        treinamentos = filtro[col_trein].dropna().tolist()
 
         return (nome, cargo, depto, unidade), treinamentos
 
