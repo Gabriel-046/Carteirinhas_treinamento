@@ -187,7 +187,7 @@ elif st.session_state["pagina"] == "principal":
             f"UNIDADE: {unidade}"
         ]
         for linha in info:
-            draw.text((info_x, info_y), linha, font=font_info, fill="black")
+            draw.text((info_x, info_y), linha, font=font_info, fill="#304F7E")
             info_y += line_height_info
 
         # Treinamentos à direita
