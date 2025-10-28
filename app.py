@@ -9,12 +9,12 @@ import hashlib
 import os
 import textwrap
 
-# Configuração da página
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
 usuarios_file = "usuarios.xlsx"
 treinamentos_file = "Treinamentos Normativos.xlsx"
 image_path = "image.png"
+logo_path = "logo.png"
 
 # Funções auxiliares
 def gerar_hash(senha):
@@ -58,12 +58,10 @@ def atualizar_perfil(re, perfil):
         df_users = pd.concat([df_users, pd.DataFrame({"RE": [re], "senha_hash": [""], "perfil": [perfil]})])
     salvar_usuarios(df_users)
 
-# Inicializa arquivo de usuários
 if not os.path.exists(usuarios_file):
     df_init = pd.DataFrame([{"RE": "1", "senha_hash": gerar_hash("master123!"), "perfil": "MASTER"}])
     df_init.to_excel(usuarios_file, index=False)
 
-# Controle de navegação
 if "pagina" not in st.session_state:
     st.session_state["pagina"] = "login"
 
@@ -165,6 +163,11 @@ elif st.session_state["pagina"] == "principal":
         background = Image.open(image_path).convert("RGB")
         draw = ImageDraw.Draw(background)
 
+        # Adiciona logo no topo esquerdo
+        if os.path.exists(logo_path):
+            logo = Image.open(logo_path).resize((250, 150))
+            background.paste(logo, (50, 30))
+
         try:
             font_info = ImageFont.truetype("Montserrat.ttf", 22)
             font_trein = ImageFont.truetype("Montserrat.ttf", 18)
@@ -174,7 +177,7 @@ elif st.session_state["pagina"] == "principal":
 
         # Informações pessoais à esquerda
         info_x = 50
-        info_y = 150
+        info_y = 200
         line_height_info = 40
         info = [
             f"NOME: {nome}",
@@ -222,9 +225,6 @@ elif st.session_state["pagina"] == "principal":
         if not dados:
             st.warning(f"Nenhum treinamento encontrado para RE {re_consulta}.")
         else:
-            st.write("Treinamentos encontrados:", len(treinamentos))
-            for t in treinamentos:
-                st.write("-", t)
             img_path, pdf_path = gerar_carteirinha(dados[0], re_consulta, dados[1], dados[2], dados[3], treinamentos)
             st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
             with open(img_path, "rb") as img_file:
