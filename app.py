@@ -218,9 +218,9 @@ elif st.session_state["pagina"] == "principal":
             img_path, pdf_path = gerar_carteirinha(dados[0], re_consulta, dados[1], dados[2], dados[3], treinamentos)
             st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
             with open(img_path, "rb") as img_file:
-                st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png", key="2ffdf33b-d8dd-49a3-a707-0d91d813c546")
+                st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
             with open(pdf_path, "rb") as pdf_file:
-                st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf", key="5f7ef367-5040-4488-819b-c71ce4d4da28")
+                st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
 
     # Aba Gerar Carteirinha de Outro
     if perfil in ["MASTER", "ADM"]:
@@ -235,9 +235,9 @@ elif st.session_state["pagina"] == "principal":
                     img_path, pdf_path = gerar_carteirinha(dados[0], re_outro, dados[1], dados[2], dados[3], treinamentos)
                     st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
                     with open(img_path, "rb") as img_file:
-                        st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png", key="23276a60-fe0f-4b16-814f-58b88dfcc3d3")
+                        st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
                     with open(pdf_path, "rb") as pdf_file:
-                        st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf", key="0f65eef2-f555-4eba-81d0-94750b3fec07")
+                        st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
 
     # Aba Gerenciar Perfis
     if perfil == "MASTER":
