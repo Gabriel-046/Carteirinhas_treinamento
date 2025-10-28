@@ -145,7 +145,6 @@ elif st.session_state["pagina"] == "principal":
         depto = filtro.iloc[0][col_depto]
         unidade = filtro.iloc[0][col_unidade]
 
-        # Apenas coluna TREINAMENTO_STATUS_GERAL
         treinamentos = filtro[col_trein].dropna().tolist()
 
         return (nome, cargo, depto, unidade), treinamentos
@@ -154,12 +153,10 @@ elif st.session_state["pagina"] == "principal":
         background = Image.open(image_path).convert("RGB")
         draw = ImageDraw.Draw(background)
 
-        # Adiciona logo no topo esquerdo
         if os.path.exists(logo_path):
             logo = Image.open(logo_path).resize((250, 150))
             background.paste(logo, (50, 30))
 
-        # Fonte padrão
         try:
             font_info = ImageFont.truetype("DejaVuSans-Bold.ttf", 22)
             font_trein = ImageFont.truetype("DejaVuSans.ttf", 18)
@@ -167,11 +164,10 @@ elif st.session_state["pagina"] == "principal":
             font_info = ImageFont.load_default()
             font_trein = ImageFont.load_default()
 
-        # Informações pessoais com quebra de linha
         info_x = 50
         info_y = 200
         line_height_info = 45
-        max_width_info = 25
+        max_width_info = 30
         info = [
             f"NOME: {nome}",
             f"RE: {re_input}",
@@ -185,10 +181,9 @@ elif st.session_state["pagina"] == "principal":
                 draw.text((info_x, info_y), parte, font=font_info, fill="#304F7E")
                 info_y += line_height_info
 
-        # Treinamentos à direita
         train_x = 500
         train_y = 100
-        max_width = 75
+        max_width = 50
         for t in treinamentos:
             linhas = textwrap.wrap(t, width=max_width)
             for linha in linhas:
@@ -196,7 +191,6 @@ elif st.session_state["pagina"] == "principal":
                 train_y += 28
             train_y += 10
 
-        # Rodapé
         hora_local = datetime.now(pytz.timezone("America/Campo_Grande")).strftime("%d/%m/%Y %H:%M")
         draw.text((50, background.height - 40), f"Consulta em: {hora_local}", font=font_trein, fill="gray")
 
@@ -213,6 +207,7 @@ elif st.session_state["pagina"] == "principal":
 
     df = carregar_planilha()
 
+    # Aba Minha Carteirinha
     with tabs[0]:
         st.subheader("Minha Carteirinha")
         re_consulta = st.session_state["usuario_logado"]
@@ -226,3 +221,30 @@ elif st.session_state["pagina"] == "principal":
                 st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
             with open(pdf_path, "rb") as pdf_file:
                 st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
+
+    # Aba Gerar Carteirinha de Outro
+    if perfil in ["MASTER", "ADM"]:
+        with tabs[1]:
+            st.subheader("Gerar Carteirinha de Outro Colaborador")
+            re_outro = st.text_input("Digite o RE do colaborador")
+            if st.button("Gerar Carteirinha"):
+                dados, treinamentos = buscar_treinamentos(df, re_outro)
+                if not dados:
+                    st.warning(f"Nenhum treinamento encontrado para RE {re_outro}.")
+                else:
+                    img_path, pdf_path = gerar_carteirinha(dados[0], re_outro, dados[1], dados[2], dados[3], treinamentos)
+                    st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
+                    with open(img_path, "rb") as img_file:
+                        st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
+                    with open(pdf_path, "rb") as pdf_file:
+                        st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
+
+    # Aba Gerenciar Perfis
+    if perfil == "MASTER":
+        with tabs[2]:
+            st.subheader("Gerenciar Perfis")
+            re_alvo = st.text_input("Digite o RE para alterar perfil")
+            novo_perfil = st.selectbox("Novo perfil", ["USER", "ADM", "MASTER"])
+            if st.button("Atualizar Perfil"):
+                atualizar_perfil(re_alvo, novo_perfil)
+                st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
