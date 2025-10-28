@@ -62,28 +62,37 @@ if not os.path.exists(usuarios_file):
     df_init = pd.DataFrame([{"RE": "1", "senha_hash": gerar_hash("master123!"), "perfil": "MASTER"}])
     df_init.to_excel(usuarios_file, index=False)
 
-# Interface principal
-aba = st.radio("Selecione a opção:", ["Login", "Primeiro acesso / Recuperar senha"])
+# Controle de navegação
+if "pagina" not in st.session_state:
+    st.session_state["pagina"] = "login"
 
-if aba == "Login":
-    st.subheader("🔐 Login")
+# Página de Login
+if st.session_state["pagina"] == "login":
+    st.title("🔐 Login")
     re = st.text_input("RE")
     senha = st.text_input("Senha", type="password")
-    if st.button("Entrar"):
-        ok, perfil = verificar_login(re, senha)
-        if ok:
-            st.session_state["usuario_logado"] = re
-            st.session_state["perfil"] = perfil
-            st.success(f"Login bem-sucedido! Perfil: {perfil}")
-        else:
-            st.error("RE ou senha inválidos.")
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("Entrar"):
+            ok, perfil = verificar_login(re, senha)
+            if ok:
+                st.session_state["usuario_logado"] = re
+                st.session_state["perfil"] = perfil
+                st.session_state["pagina"] = "principal"
+                st.success("Login realizado com sucesso!")
+            else:
+                st.error("RE ou senha inválidos.")
+    with col2:
+        if st.button("Redefinir senha"):
+            st.session_state["pagina"] = "redefinir"
 
-elif aba == "Primeiro acesso / Recuperar senha":
-    st.subheader("🔑 Criar ou recuperar senha")
+# Página de redefinição de senha
+elif st.session_state["pagina"] == "redefinir":
+    st.title("🔑 Redefinir Senha")
     re_input = st.text_input("Digite seu RE")
     nova_senha = st.text_input("Nova senha", type="password")
     confirmar_senha = st.text_input("Confirme a senha", type="password")
-    if st.button("Criar/Atualizar senha"):
+    if st.button("Atualizar senha"):
         if not re_input or not nova_senha or not confirmar_senha:
             st.error("Preencha todos os campos.")
         elif nova_senha != confirmar_senha:
@@ -92,14 +101,20 @@ elif aba == "Primeiro acesso / Recuperar senha":
             st.error("A senha deve conter números, letras maiúsculas e minúsculas, caracteres especiais e no mínimo 10 caracteres.")
         else:
             atualizar_senha(re_input, nova_senha)
-            st.success("Senha criada/atualizada com sucesso! Volte para a aba Login.")
+            st.success("Senha atualizada com sucesso!")
+            st.session_state["pagina"] = "login"
 
-# Após login
-if "usuario_logado" in st.session_state and "perfil" in st.session_state:
+# Página principal após login
+elif st.session_state["pagina"] == "principal":
     perfil = st.session_state["perfil"]
     st.title("Carteirinha Digital de Treinamento")
 
-    # Definir abas conforme perfil
+    # Botão de logout
+    if st.button("🚪 Logout"):
+        st.session_state.clear()
+        st.session_state["pagina"] = "login"
+
+    # Abas conforme perfil
     if perfil == "MASTER":
         tabs = st.tabs(["Minha Carteirinha", "Gerar Carteirinha de Outro", "Gerenciar Perfis"])
     elif perfil == "ADM":
@@ -201,33 +216,3 @@ if "usuario_logado" in st.session_state and "perfil" in st.session_state:
                     st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
                 with open(pdf_path, "rb") as pdf_file:
                     st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
-
-    # Aba Gerar Carteirinha de Outro
-    if perfil in ["MASTER", "ADM"]:
-        with tabs[1]:
-            st.subheader("Gerar Carteirinha de Outro Colaborador")
-            re_outro = st.text_input("Digite o RE do colaborador")
-            if st.button("Gerar Carteirinha de Outro"):
-                dados, treinamentos = buscar_treinamentos(df, re_outro)
-                if not dados:
-                    st.warning(f"Nenhum treinamento encontrado para RE {re_outro}.")
-                else:
-                    st.write("Treinamentos encontrados:", len(treinamentos))
-                    for t in treinamentos:
-                        st.write("-", t)
-                    img_path, pdf_path = gerar_carteirinha(dados[0], re_outro, dados[1], dados[2], dados[3], treinamentos)
-                    st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
-                    with open(img_path, "rb") as img_file:
-                        st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
-                    with open(pdf_path, "rb") as pdf_file:
-                        st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
-
-    # Aba Gerenciar Perfis
-    if perfil == "MASTER":
-        with tabs[2]:
-            st.subheader("Gerenciar Perfis")
-            re_alvo = st.text_input("RE para alterar perfil")
-            novo_perfil = st.selectbox("Novo perfil", ["USER", "ADM", "MASTER"])
-            if st.button("Atualizar perfil"):
-                atualizar_perfil(re_alvo, novo_perfil)
-                st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
