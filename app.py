@@ -9,10 +9,12 @@ import hashlib
 import os
 import textwrap
 
+# Configuração da página
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
 usuarios_file = "usuarios.xlsx"
 treinamentos_file = "Treinamentos Normativos.xlsx"
+image_path = "image.png"
 
 # Funções auxiliares
 def gerar_hash(senha):
@@ -56,10 +58,12 @@ def atualizar_perfil(re, perfil):
         df_users = pd.concat([df_users, pd.DataFrame({"RE": [re], "senha_hash": [""], "perfil": [perfil]})])
     salvar_usuarios(df_users)
 
+# Inicializa arquivo de usuários
 if not os.path.exists(usuarios_file):
     df_init = pd.DataFrame([{"RE": "1", "senha_hash": gerar_hash("master123!"), "perfil": "MASTER"}])
     df_init.to_excel(usuarios_file, index=False)
 
+# Controle de navegação
 if "pagina" not in st.session_state:
     st.session_state["pagina"] = "login"
 
@@ -100,6 +104,7 @@ elif st.session_state["pagina"] == "redefinir":
             st.success("Senha atualizada com sucesso!")
             st.session_state["pagina"] = "login"
 
+# Página principal
 elif st.session_state["pagina"] == "principal":
     perfil = st.session_state["perfil"]
     st.title("Carteirinha Digital de Treinamento")
@@ -157,30 +162,48 @@ elif st.session_state["pagina"] == "principal":
         return (nome, cargo, depto, unidade), treinamentos
 
     def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
-        img = Image.open("image.png").convert("RGB")
-        draw = ImageDraw.Draw(img)
+        background = Image.open(image_path).convert("RGB")
+        draw = ImageDraw.Draw(background)
+
         try:
-            font = ImageFont.truetype("Montserrat.ttf", 18)
+            font_info = ImageFont.truetype("Montserrat.ttf", 22)
+            font_trein = ImageFont.truetype("Montserrat.ttf", 18)
         except:
-            font = ImageFont.load_default()
+            font_info = ImageFont.load_default()
+            font_trein = ImageFont.load_default()
 
-        x, y = 50, 50
-        info = [f"NOME: {nome}", f"RE: {re_input}", f"CARGO: {cargo}", f"DEPARTAMENTO: {depto}", f"UNIDADE: {unidade}"]
+        # Informações pessoais à esquerda
+        info_x = 50
+        info_y = 150
+        line_height_info = 40
+        info = [
+            f"NOME: {nome}",
+            f"RE: {re_input}",
+            f"CARGO: {cargo}",
+            f"DEPARTAMENTO: {depto}",
+            f"UNIDADE: {unidade}"
+        ]
         for linha in info:
-            draw.text((x, y), linha, font=font, fill="black")
-            y += 28
+            draw.text((info_x, info_y), linha, font=font_info, fill="black")
+            info_y += line_height_info
 
-        y += 20
+        # Treinamentos à direita
+        train_x = 500
+        train_y = 100
+        max_width = 50
         for t in treinamentos:
-            for linha in textwrap.wrap(t, width=50):
-                draw.text((x, y), f"- {linha}", font=font, fill="black")
-                y += 22
+            linhas = textwrap.wrap(t, width=max_width)
+            for linha in linhas:
+                draw.text((train_x, train_y), linha, font=font_trein, fill="black")
+                train_y += 28
+            train_y += 10
 
+        # Rodapé
         hora_local = datetime.now(pytz.timezone("America/Campo_Grande")).strftime("%d/%m/%Y %H:%M")
-        draw.text((x, y + 20), f"Gerado em: {hora_local}", font=font, fill="gray")
+        draw.text((50, background.height - 40), f"Consulta em: {hora_local}", font=font_trein, fill="gray")
 
         img_path = "carteirinha_final.png"
-        img.save(img_path)
+        background.save(img_path)
 
         pdf_path = "carteirinha_final.pdf"
         c = canvas.Canvas(pdf_path, pagesize=(25.4 * cm, 15 * cm))
@@ -208,4 +231,3 @@ elif st.session_state["pagina"] == "principal":
                 st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
             with open(pdf_path, "rb") as pdf_file:
                 st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
-                
