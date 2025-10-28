@@ -8,13 +8,13 @@ from reportlab.lib.units import cm
 import hashlib
 import os
 import textwrap
-import unicodedata
 
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
 
 usuarios_file = "usuarios.xlsx"
 treinamentos_file = "Treinamentos Normativos.xlsx"
 
+# Funções auxiliares
 def gerar_hash(senha):
     return hashlib.sha256(senha.encode()).hexdigest()
 
@@ -63,6 +63,7 @@ if not os.path.exists(usuarios_file):
 if "pagina" not in st.session_state:
     st.session_state["pagina"] = "login"
 
+# Página de Login
 if st.session_state["pagina"] == "login":
     st.title("🔐 Login")
     re = st.text_input("RE")
@@ -116,8 +117,12 @@ elif st.session_state["pagina"] == "principal":
 
     @st.cache_data
     def carregar_planilha():
-        df = pd.read_excel(treinamentos_file, sheet_name="BASE", engine="openpyxl")
-        df.columns = df.columns.str.strip()
+        xls = pd.ExcelFile(treinamentos_file, engine="openpyxl")
+        st.write("Abas encontradas:", xls.sheet_names)
+        df = pd.read_excel(xls, sheet_name=xls.sheet_names[0], engine="openpyxl")
+        df.columns = df.columns.str.strip().str.upper()
+        st.write("Colunas encontradas:", df.columns.tolist())
+        st.write("Quantidade de linhas:", len(df))
         return df
 
     def buscar_treinamentos(df, re_consulta):
@@ -127,6 +132,10 @@ elif st.session_state["pagina"] == "principal":
         col_depto = "DEPARTAMENTO"
         col_unidade = "FILIAL_NOME"
         col_trein = "TREINAMENTO_STATUS_GERAL"
+
+        if col_cod not in df.columns:
+            st.error(f"Coluna {col_cod} não encontrada na planilha.")
+            return None, []
 
         df[col_cod] = df[col_cod].astype(str).str.strip()
         df[col_trein] = df[col_trein].astype(str).str.strip()
@@ -151,10 +160,7 @@ elif st.session_state["pagina"] == "principal":
         try:
             font = ImageFont.truetype("Montserrat.ttf", 20)
         except:
-            try:
-                font = ImageFont.truetype("arial.ttf", 20)
-            except:
-                font = ImageFont.load_default()
+            font = ImageFont.load_default()
 
         info = [f"NOME: {nome}", f"RE: {re_input}", f"CARGO: {cargo}", f"DEPARTAMENTO: {depto}", f"UNIDADE: {unidade}"]
         x, y = 50, 50
@@ -200,31 +206,3 @@ elif st.session_state["pagina"] == "principal":
                 st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
             with open(pdf_path, "rb") as pdf_file:
                 st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
-
-    if perfil in ["MASTER", "ADM"]:
-        with tabs[1]:
-            st.subheader("Gerar Carteirinha de Outro Colaborador")
-            re_outro = st.text_input("Digite o RE do colaborador")
-            if st.button("Gerar Carteirinha de Outro"):
-                dados, treinamentos = buscar_treinamentos(df, re_outro)
-                if not dados:
-                    st.warning(f"Nenhum treinamento encontrado para RE {re_outro}.")
-                else:
-                    st.write("Treinamentos encontrados:", len(treinamentos))
-                    for t in treinamentos:
-                        st.write("-", t)
-                    img_path, pdf_path = gerar_carteirinha(dados[0], re_outro, dados[1], dados[2], dados[3], treinamentos)
-                    st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
-                    with open(img_path, "rb") as img_file:
-                        st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
-                    with open(pdf_path, "rb") as pdf_file:
-                        st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
-
-    if perfil == "MASTER":
-        with tabs[2]:
-            st.subheader("Gerenciar Perfis")
-            re_alvo = st.text_input("RE para alterar perfil")
-            novo_perfil = st.selectbox("Novo perfil", ["USER", "ADM", "MASTER"])
-            if st.button("Atualizar perfil"):
-                atualizar_perfil(re_alvo, novo_perfil)
-                st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
