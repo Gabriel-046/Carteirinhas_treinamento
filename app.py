@@ -8,6 +8,7 @@ from reportlab.lib.units import cm
 import hashlib
 import os
 import textwrap
+from unidecode import unidecode
 
 # Configuração da página
 st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="🎓")
@@ -138,13 +139,14 @@ elif st.session_state["pagina"] == "principal":
         col_trilha = "TRILHA DE TREINAMENTO"
         col_trein = "TREINAMENTO_STATUS_GERAL"
 
+        # Normalização
         df[col_cod] = df[col_cod].astype(str).str.strip()
-        df[col_trilha] = df[col_trilha].astype(str).str.upper().str.strip()
+        df[col_trilha] = df[col_trilha].apply(lambda x: unidecode(str(x)).upper().strip())
         df[col_trein] = df[col_trein].astype(str).str.strip()
 
         re_consulta = str(re_consulta).strip()
         filtro = df[(df[col_cod] == re_consulta) &
-                    (df[col_trilha].str.contains("TRILHA SEGURANÇA DO TRABALHO"))]
+                    (df[col_trilha].str.contains("TRILHA SEGURANCA DO TRABALHO"))]
 
         if filtro.empty:
             return None, []
@@ -169,6 +171,7 @@ elif st.session_state["pagina"] == "principal":
             except:
                 font = ImageFont.load_default()
 
+        # Dados pessoais
         info = [f"NOME: {nome}", f"RE: {re_input}", f"CARGO: {cargo}",
                 f"DEPARTAMENTO: {depto}", f"UNIDADE: {unidade}"]
         x, y = 50, 50
@@ -176,12 +179,14 @@ elif st.session_state["pagina"] == "principal":
             draw.text((x, y), linha, font=font, fill="black")
             y += 30
 
+        # Treinamentos
         y += 20
         for t in treinamentos:
             for linha in textwrap.wrap(t, width=40):
                 draw.text((x, y), f"- {linha}", font=font, fill="black")
                 y += 25
 
+        # Timestamp
         hora_local = datetime.now(pytz.timezone("America/Campo_Grande")).strftime("%d/%m/%Y %H:%M")
         draw.text((x, y + 20), f"Gerado em: {hora_local}", font=font, fill="gray")
 
