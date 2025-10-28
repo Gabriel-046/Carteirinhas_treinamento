@@ -168,24 +168,27 @@ elif st.session_state["pagina"] == "principal":
             logo = Image.open(logo_path).resize((250, 150))
             background.paste(logo, (50, 30))
 
+        # Fonte padrão
         try:
-            font_info = ImageFont.truetype("DejaVuSans-Bold.ttf", 20)
-            font_trein = ImageFont.truetype("DejaVuSans.ttf", 15)
+            font_info = ImageFont.truetype("DejaVuSans-Bold.ttf", 22)
+            font_trein = ImageFont.truetype("DejaVuSans.ttf", 18)
         except:
             font_info = ImageFont.load_default()
             font_trein = ImageFont.load_default()
 
+        # Limite de caracteres
+        max_chars_info = 20
+
         # Informações pessoais à esquerda
         info_x = 50
         info_y = 200
-        line_height_info = 40
-        max_chars_info = 20
+        line_height_info = 45
         info = [
-            f"NOME: {nome}",
-            f"RE: {re_input}",
-            f"CARGO: {cargo}",
-            f"DEPARTAMENTO: {depto}",
-            f"UNIDADE: {unidade}"
+            f"NOME: {nome[:max_chars_info]}",
+            f"RE: {re_input[:max_chars_info]}",
+            f"CARGO: {cargo[:max_chars_info]}",
+            f"DEPARTAMENTO: {depto[:max_chars_info]}",
+            f"UNIDADE: {unidade[:max_chars_info]}"
         ]
         for linha in info:
             draw.text((info_x, info_y), linha, font=font_info, fill="#304F7E")
@@ -194,7 +197,7 @@ elif st.session_state["pagina"] == "principal":
         # Treinamentos à direita
         train_x = 500
         train_y = 100
-        max_width = 80
+        max_width = 50
         for t in treinamentos:
             linhas = textwrap.wrap(t, width=max_width)
             for linha in linhas:
