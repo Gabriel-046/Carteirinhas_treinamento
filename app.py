@@ -183,7 +183,7 @@ elif st.session_state["pagina"] == "principal":
 
         train_x = 500
         train_y = 100
-        max_width = 50
+        max_width = 75
         for t in treinamentos:
             linhas = textwrap.wrap(t, width=max_width)
             for linha in linhas:
