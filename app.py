@@ -139,8 +139,8 @@ if "usuario_logado" in st.session_state and "perfil" in st.session_state:
 
     def buscar_treinamentos(df, re_consulta):
         df[col_cod] = df[col_cod].astype(str).str.strip()
-        df[col_trilha] = df[col_trilha].astype(str).str.upper()
-        df[col_trein] = df[col_trein].astype(str)
+        df[col_trilha] = df[col_trilha].astype(str).str.strip().str.upper()
+        df[col_trein] = df[col_trein].astype(str).str.strip()
         re_consulta = str(re_consulta).strip()
 
         filtro = df[
@@ -253,3 +253,4 @@ if "usuario_logado" in st.session_state and "perfil" in st.session_state:
             if st.button("Atualizar perfil"):
                 atualizar_perfil(re_alvo, novo_perfil)
                 st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
+``
