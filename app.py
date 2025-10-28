@@ -144,7 +144,7 @@ elif st.session_state["pagina"] == "principal":
 
         re_consulta = str(re_consulta).strip()
         filtro = df[(df[col_cod] == re_consulta) &
-                    (df[col_trilha].str.contains("TRILHA SEGURANCA DO TRABALHO"))]
+                    (df[col_trilha].str.contains("TRILHA SEGURANÇA DO TRABALHO"))]
 
         if filtro.empty:
             return None, []
@@ -198,21 +198,50 @@ elif st.session_state["pagina"] == "principal":
 
     df = carregar_planilha()
 
-    # Aba Minha Carteirinha
+    # Aba Minha Carteirinha (gera automaticamente)
     with tabs[0]:
         st.subheader("Minha Carteirinha")
         re_consulta = st.session_state["usuario_logado"]
-        if st.button("Gerar Minha Carteirinha"):
-            dados, treinamentos = buscar_treinamentos(df, re_consulta)
-            if not dados:
-                st.warning(f"Nenhum treinamento encontrado para RE {re_consulta}.")
-            else:
-                st.write("Treinamentos encontrados:", len(treinamentos))
-                for t in treinamentos:
-                    st.write("-", t)
-                img_path, pdf_path = gerar_carteirinha(dados[0], re_consulta, dados[1], dados[2], dados[3], treinamentos)
-                st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
-                with open(img_path, "rb") as img_file:
-                    st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
-                with open(pdf_path, "rb") as pdf_file:
-                    st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
+        dados, treinamentos = buscar_treinamentos(df, re_consulta)
+        if not dados:
+            st.warning(f"Nenhum treinamento encontrado para RE {re_consulta}.")
+        else:
+            st.write("Treinamentos encontrados:", len(treinamentos))
+            for t in treinamentos:
+                st.write("-", t)
+            img_path, pdf_path = gerar_carteirinha(dados[0], re_consulta, dados[1], dados[2], dados[3], treinamentos)
+            st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
+            with open(img_path, "rb") as img_file:
+                st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
+            with open(pdf_path, "rb") as pdf_file:
+                st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
+
+    # Aba Gerar Carteirinha de Outro
+    if perfil in ["MASTER", "ADM"]:
+        with tabs[1]:
+            st.subheader("Gerar Carteirinha de Outro Colaborador")
+            re_outro = st.text_input("Digite o RE do colaborador")
+            if st.button("Gerar Carteirinha de Outro"):
+                dados, treinamentos = buscar_treinamentos(df, re_outro)
+                if not dados:
+                    st.warning(f"Nenhum treinamento encontrado para RE {re_outro}.")
+                else:
+                    st.write("Treinamentos encontrados:", len(treinamentos))
+                    for t in treinamentos:
+                        st.write("-", t)
+                    img_path, pdf_path = gerar_carteirinha(dados[0], re_outro, dados[1], dados[2], dados[3], treinamentos)
+                    st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
+                    with open(img_path, "rb") as img_file:
+                        st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png")
+                    with open(pdf_path, "rb") as pdf_file:
+                        st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
+
+    # Aba Gerenciar Perfis
+    if perfil == "MASTER":
+        with tabs[2]:
+            st.subheader("Gerenciar Perfis")
+            re_alvo = st.text_input("RE para alterar perfil")
+            novo_perfil = st.selectbox("Novo perfil", ["USER", "ADM", "MASTER"])
+            if st.button("Atualizar perfil"):
+                atualizar_perfil(re_alvo, novo_perfil)
+                st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
