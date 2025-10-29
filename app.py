@@ -192,10 +192,10 @@ elif st.session_state["pagina"] == "principal":
                 y_left += 25
 
         # Treinamentos (lado direito)
-        x_right, y_right = 600, 120
+        x_right, y_right = 490, 120
         for t in treinamentos:
             for linha in textwrap.wrap(t, width=40):
-                draw.text((x_right, y_right), f"- {linha}", font=font, fill=amarelo)
+                draw.text((x_right, y_right), f"- {linha}", font=font)
                 y_right += 25
 
         # Timestamp
