@@ -190,7 +190,7 @@ elif st.session_state["pagina"] == "principal":
         for linha in info:
             for parte in textwrap.wrap(linha, width=30):
                 draw.text((x_left, y_left), parte, font=font_info, fill=azul)
-                y_left += 30
+                y_left += 40
 
         # Treinamentos (lado direito)
         x_right, y_right = 490, 120
