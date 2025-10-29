@@ -66,10 +66,11 @@ def carregar_id_colaborador():
     df_id.columns = df_id.columns.str.strip()
     return df_id
 
-# ✅ Função para registrar atividades
-def registrar_atividade(usuario, nome, acao, detalhes=""):
+# ✅ Função para registrar atividades detalhadas
+def registrar_atividade(executado_por_re, executado_por_nome, alvo_re, alvo_nome, acao, detalhes=""):
     hora = datetime.now(pytz.timezone("America/Campo_Grande")).strftime("%d/%m/%Y %H:%M:%S")
-    novo_registro = pd.DataFrame([[hora, usuario, nome, acao, detalhes]], columns=["DataHora", "Usuario", "Nome", "Acao", "Detalhes"])
+    novo_registro = pd.DataFrame([[hora, executado_por_re, executado_por_nome, alvo_re, alvo_nome, acao, detalhes]],
+                                  columns=["DataHora", "ExecutadoPor_RE", "ExecutadoPor_Nome", "Alvo_RE", "Alvo_Nome", "Acao", "Detalhes"])
     if os.path.exists(log_file):
         df_log = pd.read_csv(log_file)
         df_log = pd.concat([df_log, novo_registro], ignore_index=True)
@@ -97,9 +98,10 @@ if st.session_state["pagina"] == "login":
             ok, perfil = verificar_login(re, senha)
             if ok:
                 df_id = carregar_id_colaborador()
-                nome = df_id[df_id["COD_FUNCIONARIO"].astype(str) == str(re)]["NOME"].iloc[0] if not df_id.empty else ""
-                registrar_atividade(re, nome, "Login")
+                nome_usuario = df_id[df_id["COD_FUNCIONARIO"].astype(str) == str(re)]["NOME"].iloc[0] if not df_id.empty else ""
+                registrar_atividade(re, nome_usuario, re, nome_usuario, "Login")
                 st.session_state["usuario_logado"] = re
+                st.session_state["nome_usuario"] = nome_usuario
                 st.session_state["perfil"] = perfil
                 st.session_state["pagina"] = "principal"
                 st.rerun()
@@ -134,7 +136,7 @@ elif st.session_state["pagina"] == "redefinir":
                 cpf_tres = cpf_real[:3]
                 data_nasc = filtro.iloc[0]["DATA_NASCIMENTO"]
                 ano_real = str(data_nasc.year) if isinstance(data_nasc, datetime) else str(data_nasc).split("/")[-1]
-                nome = filtro.iloc[0]["NOME"]
+                nome_alvo = filtro.iloc[0]["NOME"]
 
                 if cpf_tres != cpf_inicio or ano_real != ano_nasc:
                     st.error("Validação falhou. Dados não conferem.")
@@ -144,7 +146,9 @@ elif st.session_state["pagina"] == "redefinir":
                     st.error("A senha deve conter números, letras maiúsculas e minúsculas, caracteres especiais e no mínimo 10 caracteres.")
                 else:
                     atualizar_senha(re_input, nova_senha)
-                    registrar_atividade(re_input, nome, "Redefinição de senha")
+                    registrar_atividade(st.session_state.get("usuario_logado", re_input),
+                                         st.session_state.get("nome_usuario", nome_alvo),
+                                         re_input, nome_alvo, "Redefinição de senha")
                     st.success("Senha atualizada com sucesso!")
                     st.session_state["pagina"] = "login"
                     st.rerun()
@@ -152,6 +156,7 @@ elif st.session_state["pagina"] == "redefinir":
 # Página principal após login
 elif st.session_state["pagina"] == "principal":
     perfil = st.session_state["perfil"]
+    nome_usuario_logado = st.session_state["nome_usuario"]
     st.title("Carteirinha Digital de Treinamento")
 
     if st.button("🚪 Logout"):
@@ -196,6 +201,7 @@ elif st.session_state["pagina"] == "principal":
         unidade = filtro.iloc[0][col_unidade]
         treinamentos = sorted(filtro[col_trein].dropna().unique())
         return (nome, cargo, depto, unidade), treinamentos
+
     def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
         azul = "#304F7E"
         cinza = "#BDBFC1"
@@ -247,7 +253,7 @@ elif st.session_state["pagina"] == "principal":
             st.warning(f"Nenhum treinamento encontrado para RE {re_consulta}.")
         else:
             img_path, pdf_path = gerar_carteirinha(dados[0], re_consulta, dados[1], dados[2], dados[3], treinamentos)
-            registrar_atividade(re_consulta, dados[0], "Gerar Carteirinha")
+            registrar_atividade(st.session_state["usuario_logado"], nome_usuario_logado, re_consulta, dados[0], "Gerar Carteirinha")
             st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
             with open(img_path, "rb") as img_file:
                 st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png", key="download_png_minha")
@@ -265,7 +271,7 @@ elif st.session_state["pagina"] == "principal":
                     st.warning(f"Nenhum treinamento encontrado para RE {re_outro}.")
                 else:
                     img_path, pdf_path = gerar_carteirinha(dados[0], re_outro, dados[1], dados[2], dados[3], treinamentos)
-                    registrar_atividade(re_outro, dados[0], "Gerar Carteirinha de Outro")
+                    registrar_atividade(st.session_state["usuario_logado"], nome_usuario_logado, re_outro, dados[0], "Gerar Carteirinha de Outro")
                     st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
                     with open(img_path, "rb") as img_file:
                         st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png", key="download_png_outro")
@@ -282,7 +288,7 @@ elif st.session_state["pagina"] == "principal":
                 atualizar_perfil(re_alvo, novo_perfil)
                 df_id = carregar_id_colaborador()
                 nome_alvo = df_id[df_id["COD_FUNCIONARIO"].astype(str) == str(re_alvo)]["NOME"].iloc[0] if not df_id.empty else ""
-                registrar_atividade(re_alvo, nome_alvo, "Alteração de perfil", f"Novo perfil: {novo_perfil}")
+                registrar_atividade(st.session_state["usuario_logado"], nome_usuario_logado, re_alvo, nome_alvo, "Alteração de perfil", f"Novo perfil: {novo_perfil}")
                 st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
 
             st.write("📥 Baixar Relatório de Atividades")
