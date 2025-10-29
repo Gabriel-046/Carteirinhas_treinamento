@@ -172,24 +172,24 @@ elif st.session_state["pagina"] == "principal":
             except:
                 font = ImageFont.load_default()
 
-        # Dados pessoais
+        # Dados pessoais (lado esquerdo)
         info = [f"NOME: {nome}", f"RE: {re_input}", f"CARGO: {cargo}",
                 f"DEPARTAMENTO: {depto}", f"UNIDADE: {unidade}"]
-        x, y = 50, 50
+        x_left, y_left = 50, 50
         for linha in info:
-            draw.text((x, y), linha, font=font, fill="black")
-            y += 30
+            draw.text((x_left, y_left), linha, font=font, fill="black")
+            y_left += 30
 
-        # Treinamentos
-        y += 20
+        # Treinamentos (lado direito)
+        x_right, y_right = 600, 120  # Ajuste conforme largura da imagem
         for t in treinamentos:
             for linha in textwrap.wrap(t, width=40):
-                draw.text((x, y), f"- {linha}", font=font, fill="black")
-                y += 25
+                draw.text((x_right, y_right), f"- {linha}", font=font, fill="black")
+                y_right += 25
 
-        # Timestamp
+        # Timestamp (parte inferior direita)
         hora_local = datetime.now(pytz.timezone("America/Campo_Grande")).strftime("%d/%m/%Y %H:%M")
-        draw.text((x, y + 20), f"Gerado em: {hora_local}", font=font, fill="gray")
+        draw.text((x_right, y_right + 20), f"Gerado em: {hora_local}", font=font, fill="gray")
 
         img_path = "carteirinha_final.png"
         img.save(img_path)
