@@ -193,11 +193,13 @@ elif st.session_state["pagina"] == "principal":
                 y_left += 40
 
         # Treinamentos (lado direito)
-        x_right, y_right = 490, 120
-        for t in treinamentos:
-            for linha in textwrap.wrap(t, width=80):
-                draw.text((x_right, y_right), f"- {linha}", font=font_treinamentos, fill=azul)
-                y_right += 22
+        
+x_right, y_right = 480, 120
+for t in treinamentos:
+    for linha in textwrap.wrap(t, width=80):
+        draw.text((x_right, y_right), linha, font=font_treinamentos, fill=azul)
+        y_right += 22
+
 
         # Timestamp
         hora_local = datetime.now(pytz.timezone("America/Campo_Grande")).strftime("%d/%m/%Y %H:%M")
