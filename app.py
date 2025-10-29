@@ -26,7 +26,7 @@ def senha_valida(senha):
         any(c.isupper() for c in senha) and
         any(c.islower() for c in senha) and
         any(c.isdigit() for c in senha) and
-        any(c in """!@#$%^&*()-_=+[]{};:'\\",.<>?/""" for c in senha)
+        any(c in "!@#$%^&*()-_=+[]{};:'\\\",.<>?/" for c in senha)
     )
 
 def carregar_usuarios():
@@ -80,7 +80,7 @@ if st.session_state["pagina"] == "login":
                 st.session_state["usuario_logado"] = re
                 st.session_state["perfil"] = perfil
                 st.session_state["pagina"] = "principal"
-                st.success("Login realizado com sucesso!")
+                st.rerun()  # ✅ Redireciona automaticamente após login
             else:
                 st.error("RE ou senha inválidos.")
     with col2:
@@ -114,7 +114,7 @@ elif st.session_state["pagina"] == "principal":
     if st.button("🚪 Logout"):
         st.session_state.clear()
         st.session_state["pagina"] = "login"
-        st.rerun()  # ✅ Corrigido
+        st.rerun()
 
     # Abas conforme perfil
     if perfil == "MASTER":
@@ -141,46 +141,37 @@ elif st.session_state["pagina"] == "principal":
         col_unidade = "FILIAL_NOME"
         col_trilha = "TRILHA DE TREINAMENTO"
         col_trein = "TREINAMENTO_STATUS_GERAL"
-
         df[col_cod] = df[col_cod].astype(str).str.strip()
         df[col_trilha] = df[col_trilha].apply(lambda x: remover_acentos(str(x)).upper().strip())
         df[col_trein] = df[col_trein].astype(str).str.strip()
         re_consulta = str(re_consulta).strip()
-
         filtro = df[df[col_cod] == re_consulta]
-
         if filtro.empty:
             return None, []
-
         nome = filtro.iloc[0][col_nome]
         cargo = filtro.iloc[0][col_cargo]
         depto = filtro.iloc[0][col_depto]
         unidade = filtro.iloc[0][col_unidade]
         treinamentos = sorted(filtro[col_trein].dropna().unique())
-
         return (nome, cargo, depto, unidade), treinamentos
 
     def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
         azul = "#304F7E"
         cinza = "#BDBFC1"
-
         img = Image.open("image.png").convert("RGB")
         draw = ImageDraw.Draw(img)
-
         try:
             font_info = ImageFont.truetype("DejaVuSans-Bold.ttf", 20)
             font_treinamentos = ImageFont.truetype("DejaVuSans.ttf", 15)
         except:
             font_info = ImageFont.load_default()
             font_treinamentos = ImageFont.load_default()
-
         try:
             logo = Image.open("logo.png").convert("RGBA")
             logo = logo.resize((150, 150))
             img.paste(logo, (50, 20), logo)
         except:
             pass
-
         info = [f"NOME: {nome}", f"RE: {re_input}", f"CARGO: {cargo}",
                 f"DEPARTAMENTO: {depto}", f"UNIDADE: {unidade}"]
         x_left, y_left = 12, 190
@@ -188,25 +179,20 @@ elif st.session_state["pagina"] == "principal":
             for parte in textwrap.wrap(linha, width=30):
                 draw.text((x_left, y_left), parte, font=font_info, fill=azul)
                 y_left += 35
-
         x_right, y_right = 500, 120
         for t in treinamentos:
             for linha in textwrap.wrap(t, width=80):
                 draw.text((x_right, y_right), linha, font=font_treinamentos, fill=azul)
                 y_right += 22
-
         hora_local = datetime.now(pytz.timezone("America/Campo_Grande")).strftime("%d/%m/%Y %H:%M")
         draw.text((x_right, y_right + 20), f"Gerado em: {hora_local}", font=font_treinamentos, fill=cinza)
-
         img_path = "carteirinha_final.png"
         img.save(img_path)
-
         pdf_path = "carteirinha_final.pdf"
         c = canvas.Canvas(pdf_path, pagesize=(25.4 * cm, 15 * cm))
         c.drawImage(img_path, 0, 0, width=25.4 * cm, height=15 * cm)
         c.showPage()
         c.save()
-
         return img_path, pdf_path
 
     df = carregar_planilha()
