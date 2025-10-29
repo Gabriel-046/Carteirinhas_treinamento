@@ -1,5 +1,33 @@
 import streamlit as st
 import pandas as pd
+import os
+usuarios_file = 'usuarios.xlsx'
+def carregar_usuarios():
+    if os.path.exists(usuarios_file):
+        return pd.read_excel(usuarios_file, engine='openpyxl')
+    else:
+        return pd.DataFrame(columns=['RE', 'perfil'])
+df_users = carregar_usuarios()
+st.title('Carteirinha Digital de Treinamento')
+re_input = st.text_input('Digite seu RE')
+if re_input:
+    user = df_users[df_users['RE'].astype(str) == str(re_input)]
+    if not user.empty:
+        perfil = user.iloc[0]['perfil']
+    else:
+        perfil = 'USER'
+    st.session_state['perfil'] = perfil
+    st.session_state['usuario_logado'] = re_input
+    st.success(f'Acesso liberado! Perfil: {perfil}')
+    if perfil == 'MASTER':
+        tabs = st.tabs(['Minha Carteirinha', 'Gerar Carteirinha de Outro', 'Gerenciar Perfis'])
+    elif perfil == 'ADM':
+        tabs = st.tabs(['Minha Carteirinha', 'Gerar Carteirinha de Outro'])
+    else:
+        tabs = st.tabs(['Minha Carteirinha'])
+
+import streamlit as st
+import pandas as pd
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import pytz
@@ -74,7 +102,7 @@ if "0001" not in df_users["RE"].astype(str).values:
     salvar_usuarios(df_users)
 
 if "pagina" not in st.session_state:
-    st.session_state["pagina"] = "principal"
+    st.session_state["pagina"] = "login"
 
 # ===================== Página Principal =====================
 
@@ -83,7 +111,7 @@ elif st.session_state["pagina"] == "principal":
     st.title("Carteirinha Digital de Treinamento")
     if st.button("🚪 Logout"):
         st.session_state.clear()
-    st.session_state["pagina"] = "principal"
+        st.session_state["pagina"] = "login"
 
     # Aqui segue o restante do seu código de carteirinha, tabs, etc.
 usuarios_file = "usuarios.xlsx"
@@ -185,7 +213,7 @@ if not os.path.exists(usuarios_file):
     df_init.to_excel(usuarios_file, index=False)
 
 if "pagina" not in st.session_state:
-    st.session_state["pagina"] = "principal"
+    st.session_state["pagina"] = "login"
 
 # Página de Login
 if st.session_state["pagina"] == "login":
@@ -222,7 +250,7 @@ elif st.session_state["pagina"] == "redefinir":
         else:
             atualizar_senha(re_input, nova_senha)
             st.success("Senha atualizada com sucesso!")
-    st.session_state["pagina"] = "principal"
+            st.session_state["pagina"] = "login"
 
 # Página principal
 elif st.session_state["pagina"] == "principal":
@@ -231,7 +259,7 @@ elif st.session_state["pagina"] == "principal":
 
     if st.button("🚪 Logout"):
         st.session_state.clear()
-    st.session_state["pagina"] = "principal"
+        st.session_state["pagina"] = "login"
 
     if perfil == "MASTER":
         tabs = st.tabs(["Minha Carteirinha", "Gerar Carteirinha de Outro", "Gerenciar Perfis"])
