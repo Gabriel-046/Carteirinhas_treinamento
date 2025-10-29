@@ -15,7 +15,8 @@ st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="�
 
 usuarios_file = "usuarios.xlsx"
 treinamentos_file = "Treinamentos Normativos.xlsx"
-id_colaborador_file = "ID_Colaborador.xlsx"  # ✅ Planilha para validação
+id_colaborador_file = "ID_Colaborador.xlsx"
+log_file = "atividades.csv"  # ✅ Arquivo para registrar atividades
 
 # Funções auxiliares
 def gerar_hash(senha):
@@ -65,6 +66,17 @@ def carregar_id_colaborador():
     df_id.columns = df_id.columns.str.strip()
     return df_id
 
+# ✅ Função para registrar atividades
+def registrar_atividade(usuario, nome, acao, detalhes=""):
+    hora = datetime.now(pytz.timezone("America/Campo_Grande")).strftime("%d/%m/%Y %H:%M:%S")
+    novo_registro = pd.DataFrame([[hora, usuario, nome, acao, detalhes]], columns=["DataHora", "Usuario", "Nome", "Acao", "Detalhes"])
+    if os.path.exists(log_file):
+        df_log = pd.read_csv(log_file)
+        df_log = pd.concat([df_log, novo_registro], ignore_index=True)
+    else:
+        df_log = novo_registro
+    df_log.to_csv(log_file, index=False)
+
 # Inicialização do arquivo de usuários
 if not os.path.exists(usuarios_file):
     df_init = pd.DataFrame([{"RE": "1", "senha_hash": gerar_hash("master123!"), "perfil": "MASTER"}])
@@ -84,17 +96,21 @@ if st.session_state["pagina"] == "login":
         if st.button("Entrar"):
             ok, perfil = verificar_login(re, senha)
             if ok:
+                # Buscar nome para log
+                df_id = carregar_id_colaborador()
+                nome = df_id[df_id["COD_FUNCIONARIO"].astype(str) == str(re)]["NOME"].iloc[0] if not df_id.empty else ""
+                registrar_atividade(re, nome, "Login")
                 st.session_state["usuario_logado"] = re
                 st.session_state["perfil"] = perfil
                 st.session_state["pagina"] = "principal"
-                st.rerun()  # ✅ Redireciona automaticamente após login
+                st.rerun()
             else:
                 st.error("RE ou senha inválidos.")
     with col2:
-        if st.button("Primeiro Acesso ou Redefinir Senha"):
+        if st.button("Redefinir senha"):
             st.session_state["pagina"] = "redefinir"
 
-# Página de redefinição de senha com validação extra
+# Página de redefinição de senha
 elif st.session_state["pagina"] == "redefinir":
     st.title("🔑 Redefinir Senha")
     re_input = st.text_input("Digite seu RE")
@@ -117,15 +133,9 @@ elif st.session_state["pagina"] == "redefinir":
             else:
                 cpf_real = str(filtro.iloc[0]["CPF"]).replace(".", "").replace("-", "").strip()
                 cpf_tres = cpf_real[:3]
-
                 data_nasc = filtro.iloc[0]["DATA_NASCIMENTO"]
-                if isinstance(data_nasc, datetime):
-                    ano_real = str(data_nasc.year)
-                else:
-                    ano_real = str(data_nasc).split("/")[-1]
-
-                # Debug opcional para verificar valores
-                st.write(f"DEBUG → CPF esperado: {cpf_tres}, Ano esperado: {ano_real}")
+                ano_real = str(data_nasc.year) if isinstance(data_nasc, datetime) else str(data_nasc).split("/")[-1]
+                nome = filtro.iloc[0]["NOME"]
 
                 if cpf_tres != cpf_inicio or ano_real != ano_nasc:
                     st.error("Validação falhou. Dados não conferem.")
@@ -135,6 +145,7 @@ elif st.session_state["pagina"] == "redefinir":
                     st.error("A senha deve conter números, letras maiúsculas e minúsculas, caracteres especiais e no mínimo 10 caracteres.")
                 else:
                     atualizar_senha(re_input, nova_senha)
+                    registrar_atividade(re_input, nome, "Redefinição de senha")
                     st.success("Senha atualizada com sucesso!")
                     st.session_state["pagina"] = "login"
                     st.rerun()
@@ -234,15 +245,13 @@ elif st.session_state["pagina"] == "principal":
     # Aba Minha Carteirinha
     with tabs[0]:
         st.subheader("Minha Carteirinha")
-        if "usuario_logado" not in st.session_state:
-            st.warning("Você precisa fazer login para acessar esta funcionalidade.")
-            st.stop()
         re_consulta = st.session_state["usuario_logado"]
         dados, treinamentos = buscar_treinamentos(df, re_consulta)
         if not dados:
             st.warning(f"Nenhum treinamento encontrado para RE {re_consulta}.")
         else:
             img_path, pdf_path = gerar_carteirinha(dados[0], re_consulta, dados[1], dados[2], dados[3], treinamentos)
+            registrar_atividade(re_consulta, dados[0], "Gerar Carteirinha")
             st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
             with open(img_path, "rb") as img_file:
                 st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png", key="download_png_minha")
@@ -260,6 +269,7 @@ elif st.session_state["pagina"] == "principal":
                     st.warning(f"Nenhum treinamento encontrado para RE {re_outro}.")
                 else:
                     img_path, pdf_path = gerar_carteirinha(dados[0], re_outro, dados[1], dados[2], dados[3], treinamentos)
+                    registrar_atividade(re_outro, dados[0], "Gerar Carteirinha de Outro")
                     st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
                     with open(img_path, "rb") as img_file:
                         st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png", key="download_png_outro")
@@ -274,4 +284,15 @@ elif st.session_state["pagina"] == "principal":
             novo_perfil = st.selectbox("Novo perfil", ["USER", "ADM", "MASTER"])
             if st.button("Atualizar perfil"):
                 atualizar_perfil(re_alvo, novo_perfil)
+                df_id = carregar_id_colaborador()
+                nome_alvo = df_id[df_id["COD_FUNCIONARIO"].astype(str) == str(re_alvo)]["NOME"].iloc[0] if not df_id.empty else ""
+                registrar_atividade(re_alvo, nome_alvo, "Alteração de perfil", f"Novo perfil: {novo_perfil}")
                 st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
+
+            st.write("📊 Relatório de Atividades")
+            if os.path.exists(log_file):
+                df_log = pd.read_csv(log_file)
+                st.dataframe(df_log)
+                st.download_button("📥 Baixar Relatório", df_log.to_csv(index=False), "relatorio_atividades.csv", "text/csv")
+            else:
+                st.info("Nenhuma atividade registrada ainda.")
