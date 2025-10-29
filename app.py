@@ -96,7 +96,6 @@ if st.session_state["pagina"] == "login":
         if st.button("Entrar"):
             ok, perfil = verificar_login(re, senha)
             if ok:
-                # Buscar nome para log
                 df_id = carregar_id_colaborador()
                 nome = df_id[df_id["COD_FUNCIONARIO"].astype(str) == str(re)]["NOME"].iloc[0] if not df_id.empty else ""
                 registrar_atividade(re, nome, "Login")
@@ -155,13 +154,11 @@ elif st.session_state["pagina"] == "principal":
     perfil = st.session_state["perfil"]
     st.title("Carteirinha Digital de Treinamento")
 
-    # Botão de logout
     if st.button("🚪 Logout"):
         st.session_state.clear()
         st.session_state["pagina"] = "login"
         st.rerun()
 
-    # Abas conforme perfil
     if perfil == "MASTER":
         tabs = st.tabs(["Minha Carteirinha", "Gerar Carteirinha de Outro", "Gerenciar Perfis"])
     elif perfil == "ADM":
@@ -199,7 +196,6 @@ elif st.session_state["pagina"] == "principal":
         unidade = filtro.iloc[0][col_unidade]
         treinamentos = sorted(filtro[col_trein].dropna().unique())
         return (nome, cargo, depto, unidade), treinamentos
-
     def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
         azul = "#304F7E"
         cinza = "#BDBFC1"
@@ -289,10 +285,9 @@ elif st.session_state["pagina"] == "principal":
                 registrar_atividade(re_alvo, nome_alvo, "Alteração de perfil", f"Novo perfil: {novo_perfil}")
                 st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
 
-            st.write("📊 Relatório de Atividades")
+            st.write("📥 Baixar Relatório de Atividades")
             if os.path.exists(log_file):
                 df_log = pd.read_csv(log_file)
-                st.dataframe(df_log)
                 st.download_button("📥 Baixar Relatório", df_log.to_csv(index=False), "relatorio_atividades.csv", "text/csv")
             else:
                 st.info("Nenhuma atividade registrada ainda.")
