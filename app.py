@@ -15,6 +15,7 @@ st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="�
 
 usuarios_file = "usuarios.xlsx"
 treinamentos_file = "Treinamentos Normativos.xlsx"
+id_colaborador_file = "ID_Colaborador.xlsx"  # ✅ Nova planilha para validação
 
 # Funções auxiliares
 def gerar_hash(senha):
@@ -58,6 +59,12 @@ def atualizar_perfil(re, perfil):
         df_users = pd.concat([df_users, pd.DataFrame({"RE": [re], "senha_hash": [""], "perfil": [perfil]})])
     salvar_usuarios(df_users)
 
+@st.cache_data
+def carregar_id_colaborador():
+    df_id = pd.read_excel(id_colaborador_file)
+    df_id.columns = df_id.columns.str.strip()
+    return df_id
+
 # Inicialização do arquivo de usuários
 if not os.path.exists(usuarios_file):
     df_init = pd.DataFrame([{"RE": "1", "senha_hash": gerar_hash("master123!"), "perfil": "MASTER"}])
@@ -87,23 +94,38 @@ if st.session_state["pagina"] == "login":
         if st.button("Redefinir senha"):
             st.session_state["pagina"] = "redefinir"
 
-# Página de redefinição de senha
+# Página de redefinição de senha com validação extra
 elif st.session_state["pagina"] == "redefinir":
     st.title("🔑 Redefinir Senha")
     re_input = st.text_input("Digite seu RE")
+    cpf_inicio = st.text_input("Informe os 3 primeiros dígitos do CPF")
+    ano_nasc = st.text_input("Informe seu ano de nascimento (AAAA)")
     nova_senha = st.text_input("Nova senha", type="password")
     confirmar_senha = st.text_input("Confirme a senha", type="password")
+
+    df_id = carregar_id_colaborador()
+
     if st.button("Atualizar senha"):
-        if not re_input or not nova_senha or not confirmar_senha:
+        if not re_input or not cpf_inicio or not ano_nasc or not nova_senha or not confirmar_senha:
             st.error("Preencha todos os campos.")
-        elif nova_senha != confirmar_senha:
-            st.error("As senhas não coincidem.")
-        elif not senha_valida(nova_senha):
-            st.error("A senha deve conter números, letras maiúsculas e minúsculas, caracteres especiais e no mínimo 10 caracteres.")
         else:
-            atualizar_senha(re_input, nova_senha)
-            st.success("Senha atualizada com sucesso!")
-            st.session_state["pagina"] = "login"
+            filtro = df_id[df_id["RE"].astype(str) == str(re_input)]
+            if filtro.empty:
+                st.error("RE não encontrado.")
+            else:
+                cpf_real = str(filtro.iloc[0]["CPF"])
+                ano_real = str(filtro.iloc[0]["ANO_NASCIMENTO"])
+                if not cpf_real.startswith(cpf_inicio) or ano_real != ano_nasc:
+                    st.error("Validação falhou. Dados não conferem.")
+                elif nova_senha != confirmar_senha:
+                    st.error("As senhas não coincidem.")
+                elif not senha_valida(nova_senha):
+                    st.error("A senha deve conter números, letras maiúsculas e minúsculas, caracteres especiais e no mínimo 10 caracteres.")
+                else:
+                    atualizar_senha(re_input, nova_senha)
+                    st.success("Senha atualizada com sucesso!")
+                    st.session_state["pagina"] = "login"
+                    st.rerun()
 
 # Página principal após login
 elif st.session_state["pagina"] == "principal":
@@ -219,9 +241,6 @@ elif st.session_state["pagina"] == "principal":
     if perfil in ["MASTER", "ADM"]:
         with tabs[1]:
             st.subheader("Gerar Carteirinha de Outro Colaborador")
-            if "usuario_logado" not in st.session_state:
-                st.warning("Você precisa fazer login para acessar esta funcionalidade.")
-                st.stop()
             re_outro = st.text_input("Digite o RE do colaborador")
             if st.button("Gerar Carteirinha de Outro"):
                 dados, treinamentos = buscar_treinamentos(df, re_outro)
