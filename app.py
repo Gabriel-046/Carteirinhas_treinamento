@@ -115,9 +115,18 @@ elif st.session_state["pagina"] == "redefinir":
             if filtro.empty:
                 st.error("RE não encontrado.")
             else:
-                cpf_real = str(filtro.iloc[0]["CPF"]).replace(".", "").replace("-", "")
-                cpf_tres = cpf_real[:3]  # ✅ primeiros 3 dígitos
-                ano_real = str(filtro.iloc[0]["DATA_NASCIMENTO"]).split("/")[-1]  # ✅ ano
+                cpf_real = str(filtro.iloc[0]["CPF"]).replace(".", "").replace("-", "").strip()
+                cpf_tres = cpf_real[:3]
+
+                data_nasc = filtro.iloc[0]["DATA_NASCIMENTO"]
+                if isinstance(data_nasc, datetime):
+                    ano_real = str(data_nasc.year)
+                else:
+                    ano_real = str(data_nasc).split("/")[-1]
+
+                # Debug opcional para verificar valores
+                st.write(f"DEBUG → CPF esperado: {cpf_tres}, Ano esperado: {ano_real}")
+
                 if cpf_tres != cpf_inicio or ano_real != ano_nasc:
                     st.error("Validação falhou. Dados não conferem.")
                 elif nova_senha != confirmar_senha:
