@@ -187,14 +187,14 @@ elif st.session_state["pagina"] == "principal":
                 f"DEPARTAMENTO: {depto}", f"UNIDADE: {unidade}"]
         x_left, y_left = 50, 190
         for linha in info:
-            for parte in textwrap.wrap(linha, width=40):
+            for parte in textwrap.wrap(linha, width=80):
                 draw.text((x_left, y_left), parte, font=font, fill=azul)
                 y_left += 25
 
         # Treinamentos (lado direito)
         x_right, y_right = 490, 120
         for t in treinamentos:
-            for linha in textwrap.wrap(t, width=40):
+            for linha in textwrap.wrap(t, width=):
                 draw.text((x_right, y_right), f"- {linha}", font=font, fill=azul)
                 y_right += 25
 
