@@ -169,8 +169,8 @@ elif st.session_state["pagina"] == "principal":
         draw = ImageDraw.Draw(img)
 
         try:
-            font_info = ImageFont.truetype("DejaVuSans.ttf", 24)
-            font_treinamentos = ImageFont.truetype("DejaVuSans.ttf", 18)
+            font_info = ImageFont.truetype("DejaVuSans.ttf", 20)
+            font_treinamentos = ImageFont.truetype("DejaVuSans.ttf", 15)
         except:
             font_info = ImageFont.load_default()
             font_treinamentos = ImageFont.load_default()
