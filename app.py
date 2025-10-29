@@ -146,10 +146,9 @@ elif st.session_state["pagina"] == "principal":
         df[col_cod] = df[col_cod].astype(str).str.strip()
         df[col_trilha] = df[col_trilha].apply(lambda x: remover_acentos(str(x)).upper().strip())
         df[col_trein] = df[col_trein].astype(str).str.strip()
-
         re_consulta = str(re_consulta).strip()
+
         filtro = df[df[col_cod] == re_consulta]
-                    (df[col_trilha].str.contains("TRILHA SEGURANCA DO TRABALHO"))]
 
         if filtro.empty:
             return None, []
@@ -165,7 +164,6 @@ elif st.session_state["pagina"] == "principal":
     def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
         img = Image.open("image.png").convert("RGB")
         draw = ImageDraw.Draw(img)
-
         try:
             font = ImageFont.truetype("Montserrat.ttf", 20)
         except:
@@ -206,7 +204,7 @@ elif st.session_state["pagina"] == "principal":
 
     df = carregar_planilha()
 
-    # Aba Minha Carteirinha (gera automaticamente)
+    # Aba Minha Carteirinha
     with tabs[0]:
         st.subheader("Minha Carteirinha")
         re_consulta = st.session_state["usuario_logado"]
