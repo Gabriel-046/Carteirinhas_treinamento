@@ -163,16 +163,17 @@ elif st.session_state["pagina"] == "principal":
 
     def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
         azul = "#304F7E"
-        amarelo = "#EAA239"
         cinza = "#BDBFC1"
 
         img = Image.open("image.png").convert("RGB")
         draw = ImageDraw.Draw(img)
 
         try:
-            font = ImageFont.truetype("DejaVuSans.ttf", 20)
+            font_info = ImageFont.truetype("DejaVuSans.ttf", 24)
+            font_treinamentos = ImageFont.truetype("DejaVuSans.ttf", 18)
         except:
-            font = ImageFont.load_default()
+            font_info = ImageFont.load_default()
+            font_treinamentos = ImageFont.load_default()
 
         # Inserir logo acima das informações
         try:
@@ -182,25 +183,25 @@ elif st.session_state["pagina"] == "principal":
         except:
             pass
 
-        # Dados pessoais (lado esquerdo)
+        # Informações do colaborador (lado esquerdo)
         info = [f"NOME: {nome}", f"RE: {re_input}", f"CARGO: {cargo}",
                 f"DEPARTAMENTO: {depto}", f"UNIDADE: {unidade}"]
         x_left, y_left = 50, 190
         for linha in info:
-            for parte in textwrap.wrap(linha, width=80):
-                draw.text((x_left, y_left), parte, font=font, fill=azul)
-                y_left += 25
+            for parte in textwrap.wrap(linha, width=40):
+                draw.text((x_left, y_left), parte, font=font_info, fill=azul)
+                y_left += 30
 
         # Treinamentos (lado direito)
         x_right, y_right = 490, 120
         for t in treinamentos:
             for linha in textwrap.wrap(t, width=80):
-                draw.text((x_right, y_right), f"- {linha}", font=font, fill=azul)
-                y_right += 25
+                draw.text((x_right, y_right), f"- {linha}", font=font_treinamentos, fill=azul)
+                y_right += 22
 
         # Timestamp
         hora_local = datetime.now(pytz.timezone("America/Campo_Grande")).strftime("%d/%m/%Y %H:%M")
-        draw.text((x_right, y_right + 20), f"Gerado em: {hora_local}", font=font, fill=cinza)
+        draw.text((x_right, y_right + 20), f"Gerado em: {hora_local}", font=font_treinamentos, fill=cinza)
 
         img_path = "carteirinha_final.png"
         img.save(img_path)
