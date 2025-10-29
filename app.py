@@ -212,9 +212,6 @@ elif st.session_state["pagina"] == "principal":
         if not dados:
             st.warning(f"Nenhum treinamento encontrado para RE {re_consulta}.")
         else:
-            st.write("Treinamentos encontrados:", len(treinamentos))
-            for t in treinamentos:
-                st.write("-", t)
             img_path, pdf_path = gerar_carteirinha(dados[0], re_consulta, dados[1], dados[2], dados[3], treinamentos)
             st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
             with open(img_path, "rb") as img_file:
@@ -232,9 +229,6 @@ elif st.session_state["pagina"] == "principal":
                 if not dados:
                     st.warning(f"Nenhum treinamento encontrado para RE {re_outro}.")
                 else:
-                    st.write("Treinamentos encontrados:", len(treinamentos))
-                    for t in treinamentos:
-                        st.write("-", t)
                     img_path, pdf_path = gerar_carteirinha(dados[0], re_outro, dados[1], dados[2], dados[3], treinamentos)
                     st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
                     with open(img_path, "rb") as img_file:
