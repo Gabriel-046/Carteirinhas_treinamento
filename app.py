@@ -114,7 +114,7 @@ elif st.session_state["pagina"] == "principal":
     if st.button("🚪 Logout"):
         st.session_state.clear()
         st.session_state["pagina"] = "login"
-        st.experimental_rerun()
+        st.rerun()  # ✅ Corrigido
 
     # Abas conforme perfil
     if perfil == "MASTER":
