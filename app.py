@@ -15,7 +15,7 @@ st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="�
 
 usuarios_file = "usuarios.xlsx"
 treinamentos_file = "Treinamentos Normativos.xlsx"
-id_colaborador_file = "ID_Colaborador.xlsx"  # ✅ Nova planilha para validação
+id_colaborador_file = "ID_Colaborador.xlsx"  # ✅ Planilha para validação
 
 # Funções auxiliares
 def gerar_hash(senha):
@@ -108,14 +108,17 @@ elif st.session_state["pagina"] == "redefinir":
     if st.button("Atualizar senha"):
         if not re_input or not cpf_inicio or not ano_nasc or not nova_senha or not confirmar_senha:
             st.error("Preencha todos os campos.")
+        elif len(ano_nasc) != 4 or not ano_nasc.isdigit():
+            st.error("Ano de nascimento inválido. Use formato AAAA.")
         else:
-            filtro = df_id[df_id["RE"].astype(str) == str(re_input)]
+            filtro = df_id[df_id["COD_FUNCIONARIO"].astype(str) == str(re_input)]
             if filtro.empty:
                 st.error("RE não encontrado.")
             else:
-                cpf_real = str(filtro.iloc[0]["CPF"])
-                ano_real = str(filtro.iloc[0]["ANO_NASCIMENTO"])
-                if not cpf_real.startswith(cpf_inicio) or ano_real != ano_nasc:
+                cpf_real = str(filtro.iloc[0]["CPF"]).replace(".", "").replace("-", "")
+                cpf_tres = cpf_real[:3]  # ✅ primeiros 3 dígitos
+                ano_real = str(filtro.iloc[0]["DATA_NASCIMENTO"]).split("/")[-1]  # ✅ ano
+                if cpf_tres != cpf_inicio or ano_real != ano_nasc:
                     st.error("Validação falhou. Dados não conferem.")
                 elif nova_senha != confirmar_senha:
                     st.error("As senhas não coincidem.")
