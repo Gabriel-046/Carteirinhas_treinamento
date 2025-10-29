@@ -114,6 +114,7 @@ elif st.session_state["pagina"] == "principal":
     if st.button("🚪 Logout"):
         st.session_state.clear()
         st.session_state["pagina"] = "login"
+        st.experimental_rerun()
 
     # Abas conforme perfil
     if perfil == "MASTER":
@@ -210,8 +211,12 @@ elif st.session_state["pagina"] == "principal":
 
     df = carregar_planilha()
 
+    # Aba Minha Carteirinha
     with tabs[0]:
         st.subheader("Minha Carteirinha")
+        if "usuario_logado" not in st.session_state:
+            st.warning("Você precisa fazer login para acessar esta funcionalidade.")
+            st.stop()
         re_consulta = st.session_state["usuario_logado"]
         dados, treinamentos = buscar_treinamentos(df, re_consulta)
         if not dados:
@@ -224,9 +229,13 @@ elif st.session_state["pagina"] == "principal":
             with open(pdf_path, "rb") as pdf_file:
                 st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf", key="download_pdf_minha")
 
+    # Aba Gerar Carteirinha de Outro
     if perfil in ["MASTER", "ADM"]:
         with tabs[1]:
             st.subheader("Gerar Carteirinha de Outro Colaborador")
+            if "usuario_logado" not in st.session_state:
+                st.warning("Você precisa fazer login para acessar esta funcionalidade.")
+                st.stop()
             re_outro = st.text_input("Digite o RE do colaborador")
             if st.button("Gerar Carteirinha de Outro"):
                 dados, treinamentos = buscar_treinamentos(df, re_outro)
@@ -240,6 +249,7 @@ elif st.session_state["pagina"] == "principal":
                     with open(pdf_path, "rb") as pdf_file:
                         st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf", key="download_pdf_outro")
 
+    # Aba Gerenciar Perfis
     if perfil == "MASTER":
         with tabs[2]:
             st.subheader("Gerenciar Perfis")
