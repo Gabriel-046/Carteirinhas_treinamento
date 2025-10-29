@@ -80,8 +80,8 @@ if "pagina" not in st.session_state:
 
 if st.session_state["pagina"] == "login":
     st.title("🔐 Login")
-    re = st.text_input("RE")
-    senha = st.text_input("Senha", type="password")
+    re = st.text_input("RE", key='re_1')
+    senha = st.text_input("Senha", key='senha_1', type="password")
     col1, col2 = st.columns([1, 1])
     with col1:
         if st.button("Entrar"):
@@ -101,9 +101,9 @@ if st.session_state["pagina"] == "login":
 
 elif st.session_state["pagina"] == "redefinir":
     st.title("🔑 Redefinir Senha")
-    re_input = st.text_input("Digite seu RE")
-    nova_senha = st.text_input("Nova senha", type="password")
-    confirmar_senha = st.text_input("Confirme a senha", type="password")
+    re_input = st.text_input("Digite seu RE", key='digite_seu_re_1')
+    nova_senha = st.text_input("Nova senha", key='nova_senha_1', type="password")
+    confirmar_senha = st.text_input("Confirme a senha", key='confirme_a_senha_1', type="password")
     if st.button("Atualizar senha"):
         if not re_input or not nova_senha or not confirmar_senha:
             st.error("Preencha todos os campos.")
@@ -232,8 +232,8 @@ if "pagina" not in st.session_state:
 # Página de Login
 if st.session_state["pagina"] == "login":
     st.title("🔐 Login")
-    re = st.text_input("RE")
-    senha = st.text_input("Senha", type="password")
+    re = st.text_input("RE", key='re_2')
+    senha = st.text_input("Senha", key='senha_2', type="password")
     col1, col2 = st.columns([1, 1])
     with col1:
         if st.button("Entrar"):
@@ -251,9 +251,9 @@ if st.session_state["pagina"] == "login":
 
 elif st.session_state["pagina"] == "redefinir":
     st.title("🔑 Redefinir Senha")
-    re_input = st.text_input("Digite seu RE")
-    nova_senha = st.text_input("Nova senha", type="password")
-    confirmar_senha = st.text_input("Confirme a senha", type="password")
+    re_input = st.text_input("Digite seu RE", key='digite_seu_re_2')
+    nova_senha = st.text_input("Nova senha", key='nova_senha_2', type="password")
+    confirmar_senha = st.text_input("Confirme a senha", key='confirme_a_senha_2', type="password")
     if st.button("Atualizar senha"):
         if not re_input or not nova_senha or not confirmar_senha:
             st.error("Preencha todos os campos.")
@@ -390,7 +390,7 @@ elif st.session_state["pagina"] == "principal":
     if perfil in ["MASTER", "ADM"]:
         with tabs[1]:
             st.subheader("Gerar Carteirinha de Outro Colaborador")
-            re_outro = st.text_input("Digite o RE do colaborador")
+            re_outro = st.text_input("Digite o RE do colaborador", key='digite_o_re_do_colaborador_1')
             if st.button("Gerar Carteirinha"):
                 dados, treinamentos = buscar_treinamentos(df, re_outro)
                 if not dados:
@@ -407,7 +407,7 @@ elif st.session_state["pagina"] == "principal":
     if perfil == "MASTER":
         with tabs[2]:
             st.subheader("Gerenciar Perfis")
-            re_alvo = st.text_input("Digite o RE para alterar perfil")
+            re_alvo = st.text_input("Digite o RE para alterar perfil", key='digite_o_re_para_alterar_perfil_1')
             novo_perfil = st.selectbox("Novo perfil", ["USER", "ADM", "MASTER"])
             if st.button("Atualizar Perfil"):
                 atualizar_perfil(re_alvo, novo_perfil)
