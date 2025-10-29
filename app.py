@@ -133,7 +133,34 @@ elif st.session_state["pagina"] == "principal":
     def remover_acentos(texto):
         return unicodedata.normalize('NFKD', texto).encode('ascii', 'ignore').decode('utf-8')
 
-    def buscar_treinamentos(df, re_consulta):
+def buscar_treinamentos(df, re_consulta):
+    col_cod = 'COD_FUNCIONARIO'
+    col_nome = 'NOME'
+    col_cargo = 'CARGO'
+    col_depto = 'DEPARTAMENTO'
+    col_unidade = 'FILIAL_NOME'
+    col_trein = 'TREINAMENTO_STATUS_GERAL'
+    col_desc = 'DESCRICAO'
+    col_data = 'DATA_CURSO'
+    df[col_cod] = df[col_cod].astype(str).str.strip()
+    re_consulta = str(re_consulta).strip()
+    filtro = df[df[col_cod] == re_consulta]
+    if filtro.empty:
+        return None, []
+    nome = filtro.iloc[0][col_nome]
+    cargo = filtro.iloc[0][col_cargo]
+    depto = filtro.iloc[0][col_depto]
+    unidade = filtro.iloc[0][col_unidade]
+    treinamentos = []
+    for _, row in filtro.iterrows():
+        descricao = row[col_desc] if col_desc in row else ''
+        status = row[col_trein] if col_trein in row else ''
+        vencimento = row[col_data] if col_data in row and pd.notnull(row[col_data]) else ''
+        texto = f'{descricao} - {status}'
+        if vencimento:
+            texto += f' - vence em {vencimento.strftime('%d/%m/%Y')}'
+        treinamentos.append(texto)
+    return (nome, cargo, depto, unidade), treinamentos
         col_cod = "COD_FUNCIONARIO"
         col_nome = "NOME"
         col_cargo = "CARGO"
@@ -148,7 +175,7 @@ elif st.session_state["pagina"] == "principal":
         df[col_trein] = df[col_trein].astype(str).str.strip()
 
         re_consulta = str(re_consulta).strip()
-        filtro = df[df[col_cod] == re_consulta]
+        filtro = df[(df[col_cod] == re_consulta) &
                     (df[col_trilha].str.contains("TRILHA SEGURANCA DO TRABALHO"))]
 
         if filtro.empty:
@@ -162,7 +189,33 @@ elif st.session_state["pagina"] == "principal":
 
         return (nome, cargo, depto, unidade), treinamentos
 
-    def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
+def gerar_carteirinha(nome, re_input, cargo, depto, unidade, treinamentos):
+    background = Image.open('image.png').convert('RGB')
+    draw = ImageDraw.Draw(background)
+    try:
+        font = ImageFont.truetype('arial.ttf', 18)
+    except:
+        font = ImageFont.load_default()
+    x, y = 50, 50
+    info = [f'NOME: {nome}', f'RE: {re_input}', f'CARGO: {cargo}', f'DEPARTAMENTO: {depto}', f'UNIDADE: {unidade}']
+    for linha in info:
+        draw.text((x, y), linha, font=font, fill='black')
+        y += 30
+    y += 20
+    for t in treinamentos:
+        for linha in textwrap.wrap(t, width=50):
+            draw.text((x, y), f'- {linha}', font=font, fill='black')
+            y += 22
+    hora_local = datetime.now(pytz.timezone('America/Campo_Grande')).strftime('%d/%m/%Y %H:%M')
+    draw.text((x, y + 20), f'Gerado em: {hora_local}', font=font, fill='gray')
+    img_path = 'carteirinha_final.png'
+    background.save(img_path)
+    pdf_path = 'carteirinha_final.pdf'
+    c = canvas.Canvas(pdf_path, pagesize=(25.4 * cm, 15 * cm))
+    c.drawImage(img_path, 0, 0, width=25.4 * cm, height=15 * cm)
+    c.showPage()
+    c.save()
+    return img_path, pdf_path
         img = Image.open("image.png").convert("RGB")
         draw = ImageDraw.Draw(img)
 
