@@ -91,7 +91,7 @@ if st.session_state["pagina"] == "login":
             else:
                 st.error("RE ou senha inválidos.")
     with col2:
-        if st.button("Redefinir senha"):
+        if st.button("Primeiro Acesso ou Redefinir Senha"):
             st.session_state["pagina"] = "redefinir"
 
 # Página de redefinição de senha com validação extra
