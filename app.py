@@ -186,9 +186,9 @@ elif st.session_state["pagina"] == "principal":
         # Informações do colaborador (lado esquerdo)
         info = [f"NOME: {nome}", f"RE: {re_input}", f"CARGO: {cargo}",
                 f"DEPARTAMENTO: {depto}", f"UNIDADE: {unidade}"]
-        x_left, y_left = 50, 190
+        x_left, y_left = 10, 190
         for linha in info:
-            for parte in textwrap.wrap(linha, width=40):
+            for parte in textwrap.wrap(linha, width=25):
                 draw.text((x_left, y_left), parte, font=font_info, fill=azul)
                 y_left += 30
 
