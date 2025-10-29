@@ -230,4 +230,21 @@ elif st.session_state["pagina"] == "principal":
             re_outro = st.text_input("Digite o RE do colaborador")
             if st.button("Gerar Carteirinha de Outro"):
                 dados, treinamentos = buscar_treinamentos(df, re_outro)
-                if not dados
+                if not dados:
+                    st.warning(f"Nenhum treinamento encontrado para RE {re_outro}.")
+                else:
+                    img_path, pdf_path = gerar_carteirinha(dados[0], re_outro, dados[1], dados[2], dados[3], treinamentos)
+                    st.image(img_path, caption="Carteirinha Digital", use_container_width=True)
+                    with open(img_path, "rb") as img_file:
+                        st.download_button("📥 Baixar como PNG", img_file, "carteirinha_final.png", "image/png", key="download_png_outro")
+                    with open(pdf_path, "rb") as pdf_file:
+                        st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf", key="download_pdf_outro")
+
+    if perfil == "MASTER":
+        with tabs[2]:
+            st.subheader("Gerenciar Perfis")
+            re_alvo = st.text_input("RE para alterar perfil")
+            novo_perfil = st.selectbox("Novo perfil", ["USER", "ADM", "MASTER"])
+            if st.button("Atualizar perfil"):
+                atualizar_perfil(re_alvo, novo_perfil)
+                st.success(f"Perfil de {re_alvo} atualizado para {novo_perfil}")
