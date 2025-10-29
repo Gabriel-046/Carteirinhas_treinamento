@@ -123,7 +123,6 @@ elif st.session_state["pagina"] == "principal":
     else:
         tabs = st.tabs(["Minha Carteirinha"])
 
-    # Funções para planilha e carteirinha
     @st.cache_data
     def carregar_planilha():
         df = pd.read_excel(treinamentos_file, sheet_name="BASE", engine="openpyxl")
@@ -142,7 +141,6 @@ elif st.session_state["pagina"] == "principal":
         col_trilha = "TRILHA DE TREINAMENTO"
         col_trein = "TREINAMENTO_STATUS_GERAL"
 
-        # Normalização
         df[col_cod] = df[col_cod].astype(str).str.strip()
         df[col_trilha] = df[col_trilha].apply(lambda x: remover_acentos(str(x)).upper().strip())
         df[col_trein] = df[col_trein].astype(str).str.strip()
@@ -175,7 +173,6 @@ elif st.session_state["pagina"] == "principal":
             font_info = ImageFont.load_default()
             font_treinamentos = ImageFont.load_default()
 
-        # Inserir logo acima das informações
         try:
             logo = Image.open("logo.png").convert("RGBA")
             logo = logo.resize((150, 150))
@@ -183,25 +180,20 @@ elif st.session_state["pagina"] == "principal":
         except:
             pass
 
-        # Informações do colaborador (lado esquerdo)
         info = [f"NOME: {nome}", f"RE: {re_input}", f"CARGO: {cargo}",
                 f"DEPARTAMENTO: {depto}", f"UNIDADE: {unidade}"]
-        x_left, y_left = 12, 190
+        x_left, y_left = 50, 190
         for linha in info:
-            for parte in textwrap.wrap(linha, width=30):
+            for parte in textwrap.wrap(linha, width=50):
                 draw.text((x_left, y_left), parte, font=font_info, fill=azul)
-                y_left += 40
+                y_left += 35
 
-        # Treinamentos (lado direito)
-        
-x_right, y_right = 480, 120
-for t in treinamentos:
-    for linha in textwrap.wrap(t, width=80):
-        draw.text((x_right, y_right), linha, font=font_treinamentos, fill=azul)
-        y_right += 22
+        x_right, y_right = 500, 120
+        for t in treinamentos:
+            for linha in textwrap.wrap(t, width=80):
+                draw.text((x_right, y_right), linha, font=font_treinamentos, fill=azul)
+                y_right += 22
 
-
-        # Timestamp
         hora_local = datetime.now(pytz.timezone("America/Campo_Grande")).strftime("%d/%m/%Y %H:%M")
         draw.text((x_right, y_right + 20), f"Gerado em: {hora_local}", font=font_treinamentos, fill=cinza)
 
@@ -218,7 +210,6 @@ for t in treinamentos:
 
     df = carregar_planilha()
 
-    # Aba Minha Carteirinha
     with tabs[0]:
         st.subheader("Minha Carteirinha")
         re_consulta = st.session_state["usuario_logado"]
@@ -233,7 +224,6 @@ for t in treinamentos:
             with open(pdf_path, "rb") as pdf_file:
                 st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
 
-    # Aba Gerar Carteirinha de Outro
     if perfil in ["MASTER", "ADM"]:
         with tabs[1]:
             st.subheader("Gerar Carteirinha de Outro Colaborador")
@@ -250,7 +240,6 @@ for t in treinamentos:
                     with open(pdf_path, "rb") as pdf_file:
                         st.download_button("📄 Baixar como PDF", pdf_file, "carteirinha_final.pdf", "application/pdf")
 
-    # Aba Gerenciar Perfis
     if perfil == "MASTER":
         with tabs[2]:
             st.subheader("Gerenciar Perfis")
