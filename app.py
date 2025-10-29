@@ -194,7 +194,7 @@ elif st.session_state["pagina"] == "principal":
         # Treinamentos (lado direito)
         x_right, y_right = 490, 120
         for t in treinamentos:
-            for linha in textwrap.wrap(t, width=):
+            for linha in textwrap.wrap(t, width=80):
                 draw.text((x_right, y_right), f"- {linha}", font=font, fill=azul)
                 y_right += 25
 
