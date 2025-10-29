@@ -16,7 +16,13 @@ st.set_page_config(page_title="Carteirinha Digital de Treinamento", page_icon="�
 usuarios_file = "usuarios.xlsx"
 treinamentos_file = "Treinamentos Normativos.xlsx"
 id_colaborador_file = "ID_Colaborador.xlsx"
-log_file = "atividades.csv"  # ✅ Arquivo para registrar atividades
+log_file = "atividades.csv"
+
+# Inicialização do estado
+if "pagina" not in st.session_state:
+    st.session_state["pagina"] = "login"
+if "nome_usuario" not in st.session_state:
+    st.session_state["nome_usuario"] = ""
 
 # Funções auxiliares
 def gerar_hash(senha):
@@ -43,7 +49,6 @@ def verificar_login(re, senha):
     if not user.empty:
         return gerar_hash(senha) == user.iloc[0]["senha_hash"], user.iloc[0]["perfil"]
     return False, None
-
 def atualizar_senha(re, nova_senha):
     df_users = carregar_usuarios()
     if re in df_users["RE"].astype(str).values:
@@ -82,10 +87,6 @@ def registrar_atividade(executado_por_re, executado_por_nome, alvo_re, alvo_nome
 if not os.path.exists(usuarios_file):
     df_init = pd.DataFrame([{"RE": "1", "senha_hash": gerar_hash("master123!"), "perfil": "MASTER"}])
     df_init.to_excel(usuarios_file, index=False)
-
-# Controle de navegação
-if "pagina" not in st.session_state:
-    st.session_state["pagina"] = "login"
 
 # Página de Login
 if st.session_state["pagina"] == "login":
@@ -156,7 +157,7 @@ elif st.session_state["pagina"] == "redefinir":
 # Página principal após login
 elif st.session_state["pagina"] == "principal":
     perfil = st.session_state["perfil"]
-    nome_usuario_logado = st.session_state["nome_usuario"]
+    nome_usuario_logado = st.session_state.get("nome_usuario", "Usuário não identificado")
     st.title("Carteirinha Digital de Treinamento")
 
     if st.button("🚪 Logout"):
